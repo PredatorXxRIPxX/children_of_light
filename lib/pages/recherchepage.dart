@@ -10,7 +10,7 @@ class SearchPage extends StatefulWidget {
 class _SearchPageState extends State<SearchPage> {
   final TextEditingController _searchController = TextEditingController();
   final FocusNode _searchFocus = FocusNode();
-
+  int length = 0;
   @override
   void dispose() {
     _searchController.dispose();
@@ -43,13 +43,10 @@ class _SearchPageState extends State<SearchPage> {
               ),
             ),
             Expanded(
-              child: ListView.builder(
+              child: Container(
                 padding: const EdgeInsets.all(16),
-                itemCount: 0,
-                itemBuilder: (context, index) {
-                  return const SizedBox.shrink();
-                },
-              ),
+                child: Text('Résultats:'),
+              )
             ),
           ],
         ),
