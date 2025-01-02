@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:lumiers/auth/signin.dart';
 import 'package:lumiers/pages/mainpage.dart';
 
 void main() {
@@ -17,7 +18,7 @@ class MyApp extends StatelessWidget {
         useMaterial3: true,
       ),
       debugShowCheckedModeBanner: false,
-      home: const MainPage()
+      home: const SignInPage(),
     );
   }
 }
