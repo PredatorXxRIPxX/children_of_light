@@ -45,11 +45,6 @@ class AppwriteServices {
         password: password,
       );
 
-      await account.createEmailPasswordSession(
-        email: email,
-        password: password,
-      );
-
       await db.createDocument(
         databaseId: AppwriteConfig.databaseId,
         collectionId: AppwriteConfig.userCollection,
@@ -131,6 +126,77 @@ class AppwriteServices {
       return {
         'success': false,
         'message': 'Not authenticated',
+      };
+    }
+  }
+
+  static Future<Map<String, dynamic>> sendVerification({
+    required String email,
+  }) async {
+    try {
+      final response = await account.createVerification(
+        url: 'internal',
+      );
+
+      return {
+        'success': true,
+        'message': 'Recovery email sent',
+        'response': response,
+      };
+    } on AppwriteException catch (e) {
+      return {
+        'success': false,
+        'message': e.message ?? 'An error occurred during password recovery',
+        'code': e.code,
+      };
+    } catch (e) {
+      return {
+        'success': false,
+        'message': e.toString(),
+      };
+    }
+  }
+  static Future<Map<String, dynamic>> verifyAccount({
+    required String email,
+    required String code,
+  }) async {
+    try {
+      final response = await account.updateVerification(
+        userId: 'current',
+        secret: code,
+      );
+
+      return {
+        'success': true,
+        'message': 'Account verified',
+        'response': response,
+      };
+    } on AppwriteException catch (e) {
+      return {
+        'success': false,
+        'message': e.message ?? 'An error occurred during account verification',
+        'code': e.code,
+      };
+    } catch (e) {
+      return {
+        'success': false,
+        'message': e.toString(),
+      };
+    }
+  }
+
+  static Future<Map<String,dynamic>>updatePassword(String password) async{
+    try {
+      final resposne = await AppwriteServices.account.updatePassword(password:password);
+      return {
+        'success': true,
+        'message': 'Password updated successfully',
+        'response': resposne,
+      };
+    } catch (e) {
+      return {
+        'success': false,
+        'message': e.toString(),
       };
     }
   }

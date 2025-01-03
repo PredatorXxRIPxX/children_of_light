@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:lumiers/services/appwrite.dart';
 
 class ForgotPasswordPage extends StatefulWidget {
   const ForgotPasswordPage({super.key});
@@ -26,10 +27,60 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
     super.dispose();
   }
 
+  Future<void> updatePassword() async {
+    try {
+      final Map<String, dynamic> result =
+          await AppwriteServices.updatePassword(_newPasswordController.text);
+      if (!result['success']) {
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+          content: Text(result['message']),
+          backgroundColor: Colors.red,
+        ));
+      }else {
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+          content: Text(result['message']),
+          backgroundColor: Colors.green,
+        ));
+        Future.delayed(const Duration(seconds: 2));
+        Navigator.pop(context);
+      }
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+        content: Text(e.toString()),
+        backgroundColor: Colors.red,
+      ));
+    }
+  }
+
   Future<void> _handleSubmission() async {
     if (_formKey.currentState!.validate()) {
       setState(() => _isLoading = true);
-      await Future.delayed(const Duration(seconds: 2));
+      if (_currentStep == 0) {
+        final Map<String, dynamic> result =
+            await AppwriteServices.sendVerification(
+                email: _emailController.text);
+        if (!result['success']) {
+          ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+            content: Text(result['message']),
+            backgroundColor: Colors.red,
+          ));
+          setState(() => _isLoading = false);
+          return;
+        }
+      }
+      if (_currentStep == 1) {
+        final Map<String, dynamic> result =
+            await AppwriteServices.verifyAccount(
+                email: _emailController.text, code: _codeController.text);
+        if (!result['success']) {
+          ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+            content: Text(result['message']),
+            backgroundColor: Colors.red,
+          ));
+          setState(() => _isLoading = false);
+          return;
+        }
+      }
       setState(() {
         _isLoading = false;
         if (_currentStep < 2) _currentStep++;
@@ -139,8 +190,9 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
           borderSide: BorderSide(color: Colors.grey[300]!),
         ),
       ),
-      validator: (value) =>
-          value?.isEmpty ?? true ? 'votre s\'il vous plait entez votre mail valide ' : null,
+      validator: (value) => value?.isEmpty ?? true
+          ? 'votre s\'il vous plait entez votre mail valide '
+          : null,
     );
   }
 
@@ -186,8 +238,9 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
               borderSide: BorderSide(color: Colors.grey[300]!),
             ),
           ),
-          validator: (value) =>
-              value?.isEmpty ?? true ? 's\'il vous plait entrer votre mot de passe' : null,
+          validator: (value) => value?.isEmpty ?? true
+              ? 's\'il vous plait entrer votre mot de passe'
+              : null,
         ),
         const SizedBox(height: 16),
         TextFormField(
@@ -204,7 +257,8 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
             ),
           ),
           validator: (value) {
-            if (value?.isEmpty ?? true) return 's\'il vous plait confirmez votre mot de passe';
+            if (value?.isEmpty ?? true)
+              return 's\'il vous plait confirmez votre mot de passe';
             if (value != _newPasswordController.text) {
               return 'les mots de passe ne correspondent pas';
             }

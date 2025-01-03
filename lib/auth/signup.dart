@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:lumiers/auth/signin.dart';
-import 'package:lumiers/services/supabase.dart';
+import 'package:lumiers/services/appwrite.dart';
 
 class SignUpPage extends StatefulWidget {
   const SignUpPage({super.key});
@@ -32,10 +32,19 @@ class _SignUpPageState extends State<SignUpPage> {
   Future<void> _handleSignUp() async {
     if (_formKey.currentState!.validate() && _acceptedTerms) {
       setState(() {
-         _isLoading = true;
+        _isLoading = true;
       });
-      final response = await SupabaseService.signUp(username: _nameController.text, email: _emailController.text, password: _passwordController.text);
-      if (response != false) {
+      final Map<String, dynamic> response = await AppwriteServices.signUp(
+          username: _nameController.text,
+          email: _emailController.text,
+          password: _passwordController.text);
+      if (response['success'] == true) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Votre compte a été créé avec succès'),
+          ),
+        );
+        Future.delayed(const Duration(seconds: 2));
         Navigator.of(context).pushReplacement(
           MaterialPageRoute(
             builder: (context) => const SignInPage(),
@@ -43,8 +52,9 @@ class _SignUpPageState extends State<SignUpPage> {
         );
       } else {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Une erreur s\'est produite lors de la création de votre compte'),
+          SnackBar(
+            content: Text(
+                response['message'] ?? 'Une erreur s\'est produite, veuillez réessayer'),
           ),
         );
       }
@@ -96,8 +106,9 @@ class _SignUpPageState extends State<SignUpPage> {
                           label: 'Nom complet',
                           hint: 'Entrez votre nom complet',
                           icon: Icons.person_outline,
-                          validator: (value) =>
-                              value?.isEmpty ?? true ? 'veullez entrez votre nom complet' : null,
+                          validator: (value) => value?.isEmpty ?? true
+                              ? 'veullez entrez votre nom complet'
+                              : null,
                         ),
                         const SizedBox(height: 16),
                         _buildTextField(
@@ -106,8 +117,9 @@ class _SignUpPageState extends State<SignUpPage> {
                           hint: 'Enter votre email',
                           icon: Icons.email_outlined,
                           keyboardType: TextInputType.emailAddress,
-                          validator: (value) =>
-                              value?.isEmpty ?? true ? 'veullez entre votre email valide' : null,
+                          validator: (value) => value?.isEmpty ?? true
+                              ? 'veullez entre votre email valide'
+                              : null,
                         ),
                         const SizedBox(height: 16),
                         _buildTextField(
@@ -117,10 +129,11 @@ class _SignUpPageState extends State<SignUpPage> {
                           icon: Icons.lock_outline,
                           isPassword: true,
                           isPasswordVisible: _isPasswordVisible,
-                          onTogglePassword: () =>
-                              setState(() => _isPasswordVisible = !_isPasswordVisible),
-                          validator: (value) =>
-                              value?.isEmpty ?? true ? 'vuellez entrez votre mot de passe' : null,
+                          onTogglePassword: () => setState(
+                              () => _isPasswordVisible = !_isPasswordVisible),
+                          validator: (value) => value?.isEmpty ?? true
+                              ? 'vuellez entrez votre mot de passe'
+                              : null,
                         ),
                         const SizedBox(height: 16),
                         _buildTextField(
@@ -130,8 +143,9 @@ class _SignUpPageState extends State<SignUpPage> {
                           icon: Icons.lock_outline,
                           isPassword: true,
                           isPasswordVisible: _isConfirmPasswordVisible,
-                          onTogglePassword: () => setState(
-                              () => _isConfirmPasswordVisible = !_isConfirmPasswordVisible),
+                          onTogglePassword: () => setState(() =>
+                              _isConfirmPasswordVisible =
+                                  !_isConfirmPasswordVisible),
                           validator: (value) {
                             if (value?.isEmpty ?? true) {
                               return 'viellez confirmez votre password';
@@ -147,7 +161,8 @@ class _SignUpPageState extends State<SignUpPage> {
                           value: _acceptedTerms,
                           onChanged: (value) =>
                               setState(() => _acceptedTerms = value ?? false),
-                          title: const Text('J\'accepte les termes et conditions'),
+                          title:
+                              const Text('J\'accepte les termes et conditions'),
                           controlAffinity: ListTileControlAffinity.leading,
                           contentPadding: EdgeInsets.zero,
                         ),
@@ -156,8 +171,9 @@ class _SignUpPageState extends State<SignUpPage> {
                           width: double.infinity,
                           height: 56,
                           child: ElevatedButton(
-                            onPressed:
-                                _isLoading || !_acceptedTerms ? null : _handleSignUp,
+                            onPressed: _isLoading || !_acceptedTerms
+                                ? null
+                                : _handleSignUp,
                             style: ElevatedButton.styleFrom(
                               backgroundColor: Colors.deepPurple,
                               shape: RoundedRectangleBorder(
