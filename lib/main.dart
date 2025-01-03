@@ -1,10 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:lumiers/auth/signin.dart';
-import 'package:lumiers/services/supabase.dart';
+
 
 
 Future <void> main() async{
-  await SupabaseService.initialize();
   runApp(const MyApp());
 }
 

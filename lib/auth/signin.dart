@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:lumiers/auth/forgetpassword.dart';
 import 'package:lumiers/auth/signup.dart';
+import 'package:lumiers/pages/mainpage.dart';
+import 'package:lumiers/services/supabase.dart';
 
 class SignInPage extends StatefulWidget {
   const SignInPage({super.key});
@@ -26,7 +28,24 @@ class _SignInPageState extends State<SignInPage> {
   Future<void> _handleSignIn() async {
     if (_formKey.currentState!.validate()) {
       setState(() => _isLoading = true);
-      await Future.delayed(const Duration(seconds: 2)); 
+      final response = await SupabaseService.signIn(
+        email: _emailController.text,
+        password: _passwordController.text,
+      );
+      if (response != null) {
+        Navigator.of(context).pushReplacement(
+          MaterialPageRoute(
+            builder: (context) => const MainPage(),
+          ),
+        );
+      }else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Email ou mot de passe incorrect'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      } 
       setState(() => _isLoading = false);
     }
   }

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:lumiers/auth/signin.dart';
+import 'package:lumiers/services/supabase.dart';
 
 class SignUpPage extends StatefulWidget {
   const SignUpPage({super.key});
@@ -30,8 +31,23 @@ class _SignUpPageState extends State<SignUpPage> {
 
   Future<void> _handleSignUp() async {
     if (_formKey.currentState!.validate() && _acceptedTerms) {
-      setState(() => _isLoading = true);
-      await Future.delayed(const Duration(seconds: 2));
+      setState(() {
+         _isLoading = true;
+      });
+      final response = await SupabaseService.signUp(username: _nameController.text, email: _emailController.text, password: _passwordController.text);
+      if (response != false) {
+        Navigator.of(context).pushReplacement(
+          MaterialPageRoute(
+            builder: (context) => const SignInPage(),
+          ),
+        );
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Une erreur s\'est produite lors de la création de votre compte'),
+          ),
+        );
+      }
       setState(() => _isLoading = false);
     }
   }
