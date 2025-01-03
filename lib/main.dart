@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:lumiers/auth/signin.dart';
-import 'package:lumiers/pages/mainpage.dart';
+import 'package:lumiers/services/supabase.dart';
 
-void main() {
+
+Future <void> main() async{
+  await SupabaseService.initialize();
   runApp(const MyApp());
 }
 
@@ -22,4 +24,3 @@ class MyApp extends StatelessWidget {
     );
   }
 }
-
