@@ -17,6 +17,9 @@ class _SignInPageState extends State<SignInPage> {
   final _passwordController = TextEditingController();
   bool _isLoading = false;
   bool _isPasswordVisible = false;
+  bool stay_connected = false;
+
+  
 
   @override
   void dispose() {
@@ -25,12 +28,14 @@ class _SignInPageState extends State<SignInPage> {
     super.dispose();
   }
 
+
   Future<void> _handleSignIn() async {
     if (_formKey.currentState!.validate()) {
       setState(() => _isLoading = true);
       final Map<String,dynamic> response = await AppwriteServices.signIn(
         email: _emailController.text,
         password: _passwordController.text,
+        stayConnected: stay_connected,
       );
       final message = response['success'];
       if (message == true) {
@@ -49,6 +54,24 @@ class _SignInPageState extends State<SignInPage> {
       } 
       setState(() => _isLoading = false);
     }
+  }
+
+  Future<void> _checkSession() async {
+    final Map<String,dynamic> response = await AppwriteServices.getCurrentSession();
+    final message = response['success'];
+    if (message == true) {
+      Navigator.of(context).pushReplacement(
+        MaterialPageRoute(
+          builder: (context) => const MainPage(),
+        ),
+      );
+    }
+  }
+
+  @override
+  void initState() {
+    _checkSession();
+    super.initState();
   }
 
   @override
@@ -154,7 +177,19 @@ class _SignInPageState extends State<SignInPage> {
                           },
                         ),
                         const SizedBox(height: 12),
-                        // Forgot Password
+                        Row(
+                          children: [
+                            Checkbox(
+                              value: stay_connected,
+                              onChanged: (value) {
+                                setState(() {
+                                  stay_connected = value!;
+                                });
+                              },
+                            ),
+                            const Text('Rester connecté'),
+                          ],
+                        ),
                         Align(
                           alignment: Alignment.centerRight,
                           child: TextButton(

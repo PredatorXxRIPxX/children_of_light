@@ -18,6 +18,10 @@ class _SearchPageState extends State<SearchPage> {
     super.dispose();
   }
 
+  Future <void> _handleSearch(String value) async {
+    print(value);
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -40,6 +44,7 @@ class _SearchPageState extends State<SearchPage> {
               child: SearchBar(
                 controller: _searchController,
                 focusNode: _searchFocus,
+                handleSearch: _handleSearch,
               ),
             ),
             Expanded(
@@ -58,12 +63,15 @@ class _SearchPageState extends State<SearchPage> {
 class SearchBar extends StatelessWidget {
   final TextEditingController controller;
   final FocusNode focusNode;
+  late Future <void> Function(String) _handleSearch;
 
-  const SearchBar({
+  SearchBar({
     super.key,
     required this.controller,
     required this.focusNode,
+    required void Function(String) handleSearch,
   });
+
 
   @override
   Widget build(BuildContext context) {
@@ -91,7 +99,7 @@ class SearchBar extends StatelessWidget {
       ),
       textInputAction: TextInputAction.search,
       onSubmitted: (value) {
-        // Handle search
+        _handleSearch(value);
       },
     );
   }

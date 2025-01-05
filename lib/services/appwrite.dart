@@ -1,4 +1,3 @@
-import 'dart:core';
 import 'package:appwrite/appwrite.dart';
 
 class AppwriteConfig {
@@ -8,6 +7,7 @@ class AppwriteConfig {
   static const String musicCollection = '6777ee460016fa0d923a';
   static const String lyricsCollection = '6777ee69002b7f322b61';
   static const String endpoint = 'https://cloud.appwrite.io/v1';
+  static const String storage = '677a5b380010164633bc';
 }
 
 class AppwriteServices {
@@ -38,26 +38,25 @@ class AppwriteServices {
           'message': 'User already exists',
         };
       }
-      print("going to create");
 
       final id_user = ID.unique();
 
       await db.createDocument(
         databaseId: AppwriteConfig.databaseId,
         collectionId: AppwriteConfig.userCollection,
-        documentId: ID.unique(),
+        documentId: id_user,
         data: {
           'id_user': id_user,
           'email': email,
           'username': username,
         },
       );
+
       final user = await account.create(
         userId: id_user,
         email: email,
         password: password,
       );
-
 
       return {
         'success': true,
@@ -81,12 +80,17 @@ class AppwriteServices {
   static Future<Map<String, dynamic>> signIn({
     required String email,
     required String password,
+    required bool stayConnected,
   }) async {
     try {
       final session = await account.createEmailPasswordSession(
         email: email,
         password: password,
       );
+
+      if (!stayConnected) {
+        await account.deleteSession(sessionId: session.$id);
+      }
 
       final user = await account.get();
 
@@ -114,7 +118,11 @@ class AppwriteServices {
     try {
       await account.deleteSession(sessionId: 'current');
       return true;
+    } on AppwriteException catch (e) {
+      print('Error during sign out: ${e.message}');
+      return false;
     } catch (e) {
+      print('Error during sign out: ${e.toString()}');
       return false;
     }
   }
@@ -160,6 +168,7 @@ class AppwriteServices {
       };
     }
   }
+
   static Future<Map<String, dynamic>> verifyAccount({
     required String email,
     required String code,
@@ -189,13 +198,28 @@ class AppwriteServices {
     }
   }
 
-  static Future<Map<String,dynamic>>updatePassword(String password) async{
+  static Future<Map<String, dynamic>> updatePassword(String password) async {
     try {
-      final resposne = await AppwriteServices.account.updatePassword(password:password);
+      final response = await account.updatePassword(password: password);
       return {
         'success': true,
         'message': 'Password updated successfully',
-        'response': resposne,
+        'response': response,
+      };
+    } catch (e) {
+      return {
+        'success': false,
+        'message': e.toString(),
+      };
+    }
+  }
+
+  static Future<Map<String, dynamic>> getCurrentSession() async {
+    try {
+      return {
+        'success': true,
+        'message': 'Session retrieved successfully',
+        'response': await account.getSession(sessionId: 'current'),
       };
     } catch (e) {
       return {
