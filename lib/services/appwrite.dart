@@ -38,22 +38,26 @@ class AppwriteServices {
           'message': 'User already exists',
         };
       }
+      print("going to create");
 
-      final user = await account.create(
-        userId: ID.unique(),
-        email: email,
-        password: password,
-      );
+      final id_user = ID.unique();
 
       await db.createDocument(
         databaseId: AppwriteConfig.databaseId,
         collectionId: AppwriteConfig.userCollection,
-        documentId: user.$id,
+        documentId: ID.unique(),
         data: {
+          'id_user': id_user,
           'email': email,
           'username': username,
         },
       );
+      final user = await account.create(
+        userId: id_user,
+        email: email,
+        password: password,
+      );
+
 
       return {
         'success': true,

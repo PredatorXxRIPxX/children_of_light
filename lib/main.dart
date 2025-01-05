@@ -2,8 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:lumiers/auth/signin.dart';
 
 
-
-Future <void> main() async{
+Future<void> main() async {
+  WidgetsFlutterBinding.ensureInitialized();
   runApp(const MyApp());
 }
 
@@ -15,7 +15,13 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       title: 'Les enfants de la lumiere',
       theme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
+        colorScheme: ColorScheme.fromSeed(
+          seedColor: const Color(0xFF4A6670), 
+          primary: const Color(0xFF4A6670),
+          secondary: const Color(0xFFE6D5CA), 
+          tertiary: const Color(0xFFDAA520), 
+        ),
+        scaffoldBackgroundColor: const Color(0xFFE6D5CA),
         useMaterial3: true,
       ),
       debugShowCheckedModeBanner: false,
