@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:hugeicons/hugeicons.dart';
+import 'package:lumiers/pages/profile.dart';
 import 'package:lumiers/pages/recherchepage.dart';
 
 class MainPage extends StatefulWidget {
@@ -28,6 +29,11 @@ class _MainPageState extends State<MainPage> {
       icon: HugeIcons.strokeRoundedMusicNoteSquare02,
       label: 'Chanson audio',
       screen: Center(child: Text('Chanson audio')),
+    ),
+    NavigationItem(
+      icon: HugeIcons.strokeRoundedUser,
+      label: 'Profil',
+      screen: Profile(),
     ),
   ];
 

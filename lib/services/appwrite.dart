@@ -1,13 +1,13 @@
 import 'package:appwrite/appwrite.dart';
 
 class AppwriteConfig {
-  static const String projectId = '6777eaa7002148c96310';
-  static const String databaseId = '6777ec1b00016087c593';
-  static const String userCollection = '6777ec7d0023d9a6ffa5';
-  static const String musicCollection = '6777ee460016fa0d923a';
-  static const String lyricsCollection = '6777ee69002b7f322b61';
+  static const String projectId = '677ee4b3003777fc3095';
+  static const String databaseId = '677ee583000a6aad4d96';
+  static const String userCollection = '677ee59b001053a8d575';
+  static const String musicCollection = '677ee5af002689ed97fb';
+  static const String lyricsCollection = '677ee5bc002053b3c9e1';
   static const String endpoint = 'https://cloud.appwrite.io/v1';
-  static const String storage = '677a5b380010164633bc';
+  static const String storage = '677ee543002f651f7389';
 }
 
 class AppwriteServices {
