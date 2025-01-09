@@ -3,6 +3,7 @@ import 'package:appwrite/models.dart';
 import 'package:flutter/material.dart';
 import 'package:hugeicons/hugeicons.dart';
 import 'package:lumiers/components/musiccontainer.dart';
+import 'package:lumiers/pages/lyricsPage.dart';
 import 'package:shimmer/shimmer.dart';
 import 'package:lumiers/services/appwrite.dart';
 
@@ -136,6 +137,16 @@ class _LyricItem extends StatelessWidget {
       title: lyric.data['name'],
       icon: HugeIcons.strokeRoundedMusicNote01,
       isFavorite: false,
+      onTap: () {
+        Navigator.of(context).push(
+          MaterialPageRoute(
+            builder: (context) => LyricsPage(
+              title: lyric.data['name'],
+              fileUrl: lyric.data['url_file'],
+            ),
+          ),
+        );
+      },
     );
   }
 }
@@ -148,7 +159,7 @@ class _ShimmerItem extends StatelessWidget {
     return Shimmer.fromColors(
       baseColor: Colors.grey[300]!,
       highlightColor: Colors.grey[100]!,
-      child: const MusicContainer(
+      child: MusicContainer(
         title: '',
         icon: HugeIcons.strokeRoundedMusicNote01,
         isFavorite: false,
