@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:hugeicons/hugeicons.dart';
 import 'package:lumiers/auth/signin.dart';
 import 'package:lumiers/utils/user_provider.dart';
 import 'package:provider/provider.dart';
@@ -11,38 +12,14 @@ class Profile extends StatefulWidget {
 }
 
 class _ProfileState extends State<Profile> {
-  late UserProvider userProvider = UserProvider();
+  late UserProvider userProvider;
 
   @override
   void initState() {
     super.initState();
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      fetchUserData();
-    });
+    userProvider = Provider.of<UserProvider>(context, listen: false);
   }
 
-  Future<void> fetchUserData() async {
-    try {
-      userProvider = Provider.of<UserProvider>(context, listen: false); 
-    } catch (e) {
-      if (mounted) {
-        showDialog(
-          context: context,
-          builder: (context) => AlertDialog(
-            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
-            title: const Text('Error'),
-            content: Text('Error: $e'),
-            actions: [
-              TextButton(
-                onPressed: () => Navigator.of(context).pop(),
-                child: const Text('Close'),
-              ),
-            ],
-          ),
-        );
-      }
-    }
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -58,9 +35,6 @@ class _ProfileState extends State<Profile> {
                   child: Column(
                     children: [
                       _buildProfileInfo(),
-                      const SizedBox(height: 24),
-                      _buildStatsCard(),
-                      const SizedBox(height: 24),
                       _buildUserDetailsCard(),
                       const SizedBox(height: 24),
                       _buildActionButtons(),
@@ -77,7 +51,7 @@ class _ProfileState extends State<Profile> {
 
   Widget _buildSliverAppBar() {
     return SliverAppBar(
-      expandedHeight: 200,
+      expandedHeight: 100,
       floating: false,
       pinned: true,
       flexibleSpace: FlexibleSpaceBar(
@@ -86,7 +60,7 @@ class _ProfileState extends State<Profile> {
             gradient: LinearGradient(
               begin: Alignment.topLeft,
               end: Alignment.bottomRight,
-              colors: [Colors.blue, Colors.lightBlue],
+              colors: [Colors.purple, Colors.lightBlue],
             ),
           ),
         ),
@@ -127,9 +101,10 @@ class _ProfileState extends State<Profile> {
               radius: 20,
               backgroundColor: Colors.blue,
               child: IconButton(
-                icon: const Icon(Icons.camera_alt, color: Colors.white, size: 20),
+                icon:
+                    const Icon(Icons.camera_alt, color: Colors.white, size: 20),
                 onPressed: () {
-                  // Handle profile picture update
+            
                 },
               ),
             ),
@@ -137,14 +112,14 @@ class _ProfileState extends State<Profile> {
         ),
         const SizedBox(height: 16),
         Text(
-          userProvider.username ?? 'Unknown',
+          userProvider.username,
           style: Theme.of(context).textTheme.headlineMedium?.copyWith(
                 fontWeight: FontWeight.bold,
               ),
         ),
         const SizedBox(height: 8),
         Text(
-          userProvider.email ?? 'unknown',
+          userProvider.email,
           style: Theme.of(context).textTheme.bodyLarge?.copyWith(
                 color: Colors.grey[600],
               ),
@@ -153,56 +128,6 @@ class _ProfileState extends State<Profile> {
     );
   }
 
-  Widget _buildStatsCard() {
-    return Card(
-      elevation: 2,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-      child: Padding(
-        padding: const EdgeInsets.symmetric(vertical: 16),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-          children: [
-            _buildStatItem('Posts', '24'),
-            _buildVerticalDivider(),
-            _buildStatItem('Followers', '1.2k'),
-            _buildVerticalDivider(),
-            _buildStatItem('Following', '843'),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildStatItem(String label, String value) {
-    return Column(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        Text(
-          value,
-          style: const TextStyle(
-            fontSize: 20,
-            fontWeight: FontWeight.bold,
-          ),
-        ),
-        const SizedBox(height: 4),
-        Text(
-          label,
-          style: TextStyle(
-            fontSize: 14,
-            color: Colors.grey[600],
-          ),
-        ),
-      ],
-    );
-  }
-
-  Widget _buildVerticalDivider() {
-    return Container(
-      height: 40,
-      width: 1,
-      color: Colors.grey[300],
-    );
-  }
 
   Widget _buildUserDetailsCard() {
     return Card(
@@ -213,24 +138,23 @@ class _ProfileState extends State<Profile> {
         child: Column(
           children: [
             _buildDetailItem(
-              icon: Icons.calendar_today,
-              label: 'Joined',
-              value: 'January 2023',
-              iconColor: Colors.blue,
+              icon: HugeIcon(
+                icon: HugeIcons.strokeRoundedStarCircle,
+                color: Colors.blue,
+                size: 24.0,
+              ),
+              label: 'Favories',
+              value: 'Vos chants et quantines preférés',
             ),
             const Divider(height: 24),
             _buildDetailItem(
-              icon: Icons.location_on,
-              label: 'Location',
-              value: 'New York, USA',
-              iconColor: Colors.red,
-            ),
-            const Divider(height: 24),
-            _buildDetailItem(
-              icon: Icons.info,
-              label: 'Bio',
-              value: 'Flutter Developer | Open Source Enthusiast',
-              iconColor: Colors.green,
+              icon: HugeIcon(
+                icon: HugeIcons.strokeRoundedDownload04,
+                color: Colors.green,
+                size: 24.0,
+              ),
+              label: 'Téléchargements',
+              value: 'Vos chants et quantines téléchargés',
             ),
           ],
         ),
@@ -239,20 +163,18 @@ class _ProfileState extends State<Profile> {
   }
 
   Widget _buildDetailItem({
-    required IconData icon,
+    required HugeIcon icon,
     required String label,
     required String value,
-    required Color iconColor,
   }) {
     return Row(
       children: [
         Container(
           padding: const EdgeInsets.all(8),
           decoration: BoxDecoration(
-            color: iconColor.withOpacity(0.1),
             borderRadius: BorderRadius.circular(8),
           ),
-          child: Icon(icon, color: iconColor),
+          child: icon,
         ),
         const SizedBox(width: 16),
         Expanded(
@@ -287,9 +209,7 @@ class _ProfileState extends State<Profile> {
         _buildActionButton(
           icon: Icons.edit,
           label: 'Edit Profile',
-          onPressed: () {
-            // Handle edit profile
-          },
+          onPressed: () {},
           gradient: const LinearGradient(
             colors: [Colors.blue, Colors.lightBlue],
           ),

@@ -3,6 +3,8 @@ import 'package:lumiers/auth/forgetpassword.dart';
 import 'package:lumiers/auth/signup.dart';
 import 'package:lumiers/pages/mainpage.dart';
 import 'package:lumiers/services/appwrite.dart';
+import 'package:lumiers/utils/user_provider.dart';
+import 'package:provider/provider.dart';
 
 class SignInPage extends StatefulWidget {
   const SignInPage({super.key});
@@ -15,11 +17,10 @@ class _SignInPageState extends State<SignInPage> {
   final _formKey = GlobalKey<FormState>();
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
+  late UserProvider userprovider;
   bool _isLoading = false;
   bool _isPasswordVisible = false;
   bool stay_connected = false;
-
-  
 
   @override
   void dispose() {
@@ -28,36 +29,43 @@ class _SignInPageState extends State<SignInPage> {
     super.dispose();
   }
 
-
   Future<void> _handleSignIn() async {
     if (_formKey.currentState!.validate()) {
       setState(() => _isLoading = true);
-      final Map<String,dynamic> response = await AppwriteServices.signIn(
+      final Map<String, dynamic> response = await AppwriteServices.signIn(
         email: _emailController.text,
         password: _passwordController.text,
         stayConnected: stay_connected,
       );
       final message = response['success'];
       if (message == true) {
+        final username =
+            await AppwriteServices.getUsername(email: _emailController.text);
+            
+        userprovider.setEmail(_emailController.text);
+        userprovider.setUsername(username['username']);
+      
+
         Navigator.of(context).pushReplacement(
           MaterialPageRoute(
             builder: (context) => const MainPage(),
           ),
         );
-      }else {
+      } else {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text(response['message']),
             backgroundColor: Colors.red,
           ),
         );
-      } 
+      }
       setState(() => _isLoading = false);
     }
   }
 
   Future<void> _checkSession() async {
-    final Map<String,dynamic> response = await AppwriteServices.getCurrentSession();
+    final Map<String, dynamic> response =
+        await AppwriteServices.getCurrentSession();
     final message = response['success'];
     if (message == true) {
       Navigator.of(context).pushReplacement(
@@ -70,6 +78,7 @@ class _SignInPageState extends State<SignInPage> {
 
   @override
   void initState() {
+    userprovider = Provider.of<UserProvider>(context, listen: false);
     _checkSession();
     super.initState();
   }
@@ -196,7 +205,8 @@ class _SignInPageState extends State<SignInPage> {
                             onPressed: () {
                               Navigator.of(context).push(
                                 MaterialPageRoute(
-                                  builder: (context) => const ForgotPasswordPage(),
+                                  builder: (context) =>
+                                      const ForgotPasswordPage(),
                                 ),
                               );
                             },
@@ -238,14 +248,14 @@ class _SignInPageState extends State<SignInPage> {
                     ),
                   ),
                   const Spacer(),
-                  
+
                   Center(
                     child: InkWell(
-                      onTap: () =>  Navigator.of(context).pushReplacement(
-                                MaterialPageRoute(
-                                  builder: (context) => const SignUpPage(),
-                                ),
-                              ),
+                      onTap: () => Navigator.of(context).pushReplacement(
+                        MaterialPageRoute(
+                          builder: (context) => const SignUpPage(),
+                        ),
+                      ),
                       child: RichText(
                         text: TextSpan(
                           text: "Vous n'avez pas de compte? ",

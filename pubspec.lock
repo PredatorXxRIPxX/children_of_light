@@ -408,6 +408,22 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "6.1.2"
+  shimmer:
+    dependency: transitive
+    description:
+      name: shimmer
+      sha256: "1f1009b5845a1f88f1c5630212279540486f97409e9fc3f63883e71070d107bf"
+      url: "https://pub.dev"
+    source: hosted
+    version: "2.0.0"
+  shimmer_image:
+    dependency: "direct main"
+    description:
+      name: shimmer_image
+      sha256: c18ed0dcbb1fd56dedb1050515102f675b688b7515e93cd6705103b6813932e7
+      url: "https://pub.dev"
+    source: hosted
+    version: "0.0.2"
   sky_engine:
     dependency: transitive
     description: flutter

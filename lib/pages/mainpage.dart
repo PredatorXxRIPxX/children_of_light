@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:hugeicons/hugeicons.dart';
+import 'package:lumiers/pages/lyrics.dart';
 import 'package:lumiers/pages/profile.dart';
 import 'package:lumiers/pages/recherchepage.dart';
 
@@ -18,7 +19,7 @@ class _MainPageState extends State<MainPage> {
     NavigationItem(
       icon: HugeIcons.strokeRoundedBook02,
       label: 'Chanson ecrite',
-      screen: Center(child: Text('Chanson ecrite')),
+      screen: Lyrics(),
     ),
     NavigationItem(
       icon: HugeIcons.strokeRoundedSearch01,
@@ -54,27 +55,67 @@ class _MainPageState extends State<MainPage> {
   Widget build(BuildContext context) {
     return SafeArea(
       child: Scaffold(
-        body: PageView.builder(
-          itemCount: _navigationItems.length,
-          controller: _pageController,
-          physics: const NeverScrollableScrollPhysics(),
-          itemBuilder: (_, index) => _navigationItems[index].screen,
-        ),
-        bottomNavigationBar: BottomNavigationBar(
-          currentIndex: _selectedIndex,
-          onTap: _onItemTapped,
-          items: _navigationItems
-              .map((item) => BottomNavigationBarItem(
-                    icon: HugeIcon(
-                      icon: item.icon,
-                      color: Colors.black,
-                      size: 24.0,
-                    ),
-                    label: item.label,
-                  ))
-              .toList(),
-        ),
-      ),
+          body: PageView.builder(
+            itemCount: _navigationItems.length,
+            controller: _pageController,
+            physics: const NeverScrollableScrollPhysics(),
+            itemBuilder: (_, index) => _navigationItems[index].screen,
+          ),
+          bottomNavigationBar: Container(
+            decoration: BoxDecoration(
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withOpacity(0.1),
+                  blurRadius: 10,
+                  offset: const Offset(0, -2),
+                ),
+              ],
+            ),
+            child: BottomNavigationBar(
+              enableFeedback: true,
+              currentIndex: _selectedIndex,
+              onTap: _onItemTapped,
+              elevation: 0,
+              type: BottomNavigationBarType.fixed,
+              backgroundColor: Colors.white,
+              selectedItemColor: Theme.of(context).primaryColor,
+              unselectedItemColor: Colors.grey,
+              selectedLabelStyle: const TextStyle(
+                fontWeight: FontWeight.w600,
+                fontSize: 12,
+              ),
+              unselectedLabelStyle: const TextStyle(
+                fontWeight: FontWeight.w500,
+                fontSize: 12,
+              ),
+              items: _navigationItems
+                  .map((item) => BottomNavigationBarItem(
+                        activeIcon: Container(
+                          decoration: BoxDecoration(
+                            color:
+                                Theme.of(context).primaryColor.withOpacity(0.1),
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                          padding: const EdgeInsets.all(8),
+                          child: HugeIcon(
+                            icon: item.icon,
+                            color: Theme.of(context).primaryColor,
+                            size: 24.0,
+                          ),
+                        ),
+                        icon: Padding(
+                          padding: const EdgeInsets.all(8),
+                          child: HugeIcon(
+                            icon: item.icon,
+                            color: Colors.grey,
+                            size: 24.0,
+                          ),
+                        ),
+                        label: item.label,
+                      ))
+                  .toList(),
+            ),
+          )),
     );
   }
 }

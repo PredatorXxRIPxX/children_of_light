@@ -228,4 +228,49 @@ class AppwriteServices {
       };
     }
   }
+
+  static Future<Map<String, dynamic>> getUsername({
+    required String email,
+  }) async {
+    try {
+      final user = await db.listDocuments(
+        databaseId: AppwriteConfig.databaseId,
+        collectionId: AppwriteConfig.userCollection,
+        queries: [
+          Query.select(['username']),
+          Query.equal('email', email),
+        ]
+      );
+
+      return {
+        'success': true,
+        'message': 'Username retrieved successfully',
+        'username': user.documents[0].data['username'],
+      };
+    } catch (e) {
+      return {
+        'success': false,
+        'message': e.toString(),
+      };
+    }
+  }
+
+  static Future<Map<String, dynamic>> getLyrics(int amount) async {
+    try {
+      final documents = await db.listDocuments(databaseId: AppwriteConfig.databaseId, collectionId: AppwriteConfig.lyricsCollection,queries: [
+        Query.select(['name','url_file']),
+        Query.limit(amount),
+      ]);
+      return {
+        'success': true,
+        'message': 'Lyrics retrieved successfully',
+        'lyrics': documents.documents,
+      };
+    } catch (e) {
+      return {
+        'success': false,
+        'message': e.toString(),
+      };
+    }
+  }
 }
