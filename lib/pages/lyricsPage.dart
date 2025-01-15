@@ -1,7 +1,6 @@
 import 'dart:io';
-
 import 'package:flutter/material.dart';
-import 'package:appwrite/appwrite.dart';
+import 'package:hugeicons/hugeicons.dart';
 import 'dart:convert';
 
 import 'package:lumiers/services/appwrite.dart';
@@ -70,8 +69,26 @@ class _LyricsPageState extends State<LyricsPage> {
         actions: [
           if (!_isLoading)
             IconButton(
-              icon: const Icon(Icons.refresh),
-              onPressed: _fetchLyrics,
+              icon: HugeIcon(
+                  icon: HugeIcons.strokeRoundedDownload02, color: Colors.black),
+              onPressed: () async {
+                final response = await AppwriteServices.storage.listFiles(
+                    bucketId: AppwriteConfig.storage, search: widget.fileUrl);
+
+                final bytes = await AppwriteServices.storage.getFileView(
+                  bucketId: AppwriteConfig.storage,
+                  fileId: response.files[0].$id,
+                );
+
+                final file = File('${widget.title}.txt');
+                await file.writeAsBytes(bytes);
+
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(
+                    content: Text('Lyrics saved to ${file.path}'),
+                  ),
+                );
+              },
             ),
         ],
       ),

@@ -1,15 +1,15 @@
-// lyrics.dart
 import 'package:appwrite/models.dart';
 import 'package:flutter/material.dart';
 import 'package:hugeicons/hugeicons.dart';
 import 'package:lumiers/components/musiccontainer.dart';
+import 'package:lumiers/components/searchbar.dart';
 import 'package:lumiers/pages/lyricsPage.dart';
 import 'package:shimmer/shimmer.dart';
 import 'package:lumiers/services/appwrite.dart';
 
 class Lyrics extends StatefulWidget {
   const Lyrics({super.key});
-  
+
   @override
   State<Lyrics> createState() => _LyricsState();
 }
@@ -17,9 +17,10 @@ class Lyrics extends StatefulWidget {
 class _LyricsState extends State<Lyrics> {
   static const int _pageSize = 10;
   static const int _shimmerCount = 5;
-  
   final ScrollController _scrollController = ScrollController();
-  
+  final SearchController _searchController = SearchController();
+  final FocusNode _searchFocusNode = FocusNode();
+
   int _currentPage = 1;
   bool _isLoadingMore = false;
   bool _hasMoreData = true;
@@ -37,6 +38,8 @@ class _LyricsState extends State<Lyrics> {
   void dispose() {
     _scrollController.removeListener(_onScroll);
     _scrollController.dispose();
+    _searchController.dispose();
+    _searchFocusNode.dispose();
     super.dispose();
   }
 
@@ -54,7 +57,7 @@ class _LyricsState extends State<Lyrics> {
 
   Future<List<Document>> _fetchLyrics() async {
     final docList = await AppwriteServices.getLyrics(_currentPage * _pageSize);
-    return docList.entries.last.value ;
+    return docList.entries.last.value;
   }
 
   Future<void> _loadMore() async {
@@ -65,7 +68,7 @@ class _LyricsState extends State<Lyrics> {
     try {
       _currentPage++;
       final newLyrics = await _fetchLyrics();
-      
+
       if (newLyrics.isEmpty) {
         setState(() => _hasMoreData = false);
       } else {
@@ -97,8 +100,30 @@ class _LyricsState extends State<Lyrics> {
     await _fetchInitialLyrics();
   }
 
+  void _onSearch(String query) {
+    // Implement search functionality here
+    // You might want to filter _lyrics or fetch new data based on the query
+  }
+
   @override
   Widget build(BuildContext context) {
+    return Scaffold(
+      body: Column(
+        children: [
+          CustomSearchAppBar(
+            searchController: _searchController,
+            searchFocusNode: _searchFocusNode,
+            onSearch: _onSearch,
+          ),
+          Expanded(
+            child: _buildContent(),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildContent() {
     if (_error != null) {
       return _ErrorView(
         error: _error!,

@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:hugeicons/hugeicons.dart';
 import 'package:lumiers/pages/lyrics.dart';
 import 'package:lumiers/pages/profile.dart';
-import 'package:lumiers/pages/recherchepage.dart';
 
 class MainPage extends StatefulWidget {
   const MainPage({super.key});
@@ -20,11 +19,6 @@ class _MainPageState extends State<MainPage> {
       icon: HugeIcons.strokeRoundedBook02,
       label: 'Chanson ecrite',
       screen: Lyrics(),
-    ),
-    NavigationItem(
-      icon: HugeIcons.strokeRoundedSearch01,
-      label: 'Recherche',
-      screen: SearchPage(),
     ),
     NavigationItem(
       icon: HugeIcons.strokeRoundedMusicNoteSquare02,
