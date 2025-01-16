@@ -234,13 +234,12 @@ class AppwriteServices {
   }) async {
     try {
       final user = await db.listDocuments(
-        databaseId: AppwriteConfig.databaseId,
-        collectionId: AppwriteConfig.userCollection,
-        queries: [
-          Query.select(['username']),
-          Query.equal('email', email),
-        ]
-      );
+          databaseId: AppwriteConfig.databaseId,
+          collectionId: AppwriteConfig.userCollection,
+          queries: [
+            Query.select(['username']),
+            Query.equal('email', email),
+          ]);
 
       return {
         'success': true,
@@ -257,10 +256,13 @@ class AppwriteServices {
 
   static Future<Map<String, dynamic>> getLyrics(int amount) async {
     try {
-      final documents = await db.listDocuments(databaseId: AppwriteConfig.databaseId, collectionId: AppwriteConfig.lyricsCollection,queries: [
-        Query.select(['name','url_file']),
-        Query.limit(amount),
-      ]);
+      final documents = await db.listDocuments(
+          databaseId: AppwriteConfig.databaseId,
+          collectionId: AppwriteConfig.lyricsCollection,
+          queries: [
+            Query.select(['name', 'url_file']),
+            Query.limit(amount),
+          ]);
       return {
         'success': true,
         'message': 'Lyrics retrieved successfully',
@@ -274,4 +276,46 @@ class AppwriteServices {
     }
   }
 
+  static Future<Map<String, dynamic>> getLyricsQuery(String name) async {
+    try {
+      final response = await AppwriteServices.db.listDocuments(
+          databaseId: AppwriteConfig.databaseId,
+          collectionId: AppwriteConfig.lyricsCollection,
+          queries: [
+            Query.search('name', name),
+          ]);
+      return {
+        'success': true,
+        'message': 'Lyrics retrieved successfully',
+        'lyrics': response.documents,
+      };
+    } catch (e) {
+      return {
+        'success': false,
+        'message': e.toString(),
+      };
+    }
+  }
+
+  static Future<Map<String, dynamic>> setLyricsToFav(String idDocuments) async {
+    try {
+      final response = await AppwriteServices.db.updateDocument(
+          databaseId: AppwriteConfig.databaseId,
+          collectionId: AppwriteConfig.lyricsCollection,
+          documentId: idDocuments,
+          data: {
+            'lyrics': [],
+          });
+      return {
+        'success': true,
+        'message': 'Lyrics added to favorite',
+        'response': response,
+      };
+    } catch (e) {
+      return {
+        'success': false,
+        'message': e.toString(),
+      };
+    }
+  }
 }

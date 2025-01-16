@@ -1,3 +1,4 @@
+import 'package:appwrite/appwrite.dart';
 import 'package:appwrite/models.dart';
 import 'package:flutter/material.dart';
 import 'package:hugeicons/hugeicons.dart';
@@ -100,9 +101,21 @@ class _LyricsState extends State<Lyrics> {
     await _fetchInitialLyrics();
   }
 
-  void _onSearch(String query) {
-    // Implement search functionality here
-    // You might want to filter _lyrics or fetch new data based on the query
+  Future<void> _onSearch(String query) async {
+    if (query.isEmpty) {
+      _fetchInitialLyrics();
+    } else {
+      try {
+        final result = await AppwriteServices.getLyricsQuery(query);
+        print(result.toString());
+        setState(() {
+          _lyrics = result.entries.last.value;
+          _error = null;
+        });
+      } catch (e) {
+        setState(() => _error = e.toString());
+      }
+    }
   }
 
   @override
