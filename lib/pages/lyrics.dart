@@ -1,4 +1,3 @@
-import 'package:appwrite/appwrite.dart';
 import 'package:appwrite/models.dart';
 import 'package:flutter/material.dart';
 import 'package:hugeicons/hugeicons.dart';
@@ -164,23 +163,63 @@ class _LyricsState extends State<Lyrics> {
   }
 }
 
-class _LyricItem extends StatelessWidget {
+class _LyricItem extends StatefulWidget {
   final Document lyric;
 
   const _LyricItem({required this.lyric});
 
   @override
+  State<_LyricItem> createState() => _LyricItemState();
+}
+
+class _LyricItemState extends State<_LyricItem> {
+  bool isFavorite = false;
+
+  Future<void> _onFavoriteToggle() async {
+    try {
+      final response = await AppwriteServices.setLyricsToFav(widget.lyric);
+      if (response['success']) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: const Text('Lyric added to favorites'),
+            backgroundColor: Colors.green[300],
+          ),
+        );
+        setState(() {
+          isFavorite = !isFavorite;
+        });
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content:
+                Text(response['message'] ?? 'Failed to add lyric to favorites'),
+            backgroundColor: Colors.red[300],
+          ),
+        );
+      }
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Error: ${e.toString()}'),
+          backgroundColor: Colors.red[300],
+        ),
+      );
+    }
+  }
+
+  @override
   Widget build(BuildContext context) {
     return MusicContainer(
-      title: lyric.data['name'],
+      title: widget.lyric.data['name'],
       icon: HugeIcons.strokeRoundedMusicNote01,
-      isFavorite: false,
+      isFavorite: isFavorite,
+      onFavoriteToggle: _onFavoriteToggle,
       onTap: () {
         Navigator.of(context).push(
           MaterialPageRoute(
             builder: (context) => LyricsPage(
-              title: lyric.data['name'],
-              fileUrl: lyric.data['url_file'],
+              title: widget.lyric.data['name'],
+              fileUrl: widget.lyric.data['url_file'],
             ),
           ),
         );

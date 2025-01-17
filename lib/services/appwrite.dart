@@ -1,4 +1,6 @@
 import 'package:appwrite/appwrite.dart';
+import 'package:appwrite/models.dart';
+import 'package:lumiers/pages/lyrics.dart';
 
 class AppwriteConfig {
   static const String projectId = '677ee4b3003777fc3095';
@@ -297,14 +299,22 @@ class AppwriteServices {
     }
   }
 
-  static Future<Map<String, dynamic>> setLyricsToFav(String idDocuments) async {
+  static Future<Map<String, dynamic>> setLyricsToFav(Document lyricsDoc) async {
     try {
+      final user = await account.get();
+      final userDoc = await AppwriteServices.db.listDocuments(
+          databaseId: AppwriteConfig.databaseId,
+          collectionId: AppwriteConfig.userCollection,
+          queries: [Query.equal('email', user.email)]);
       final response = await AppwriteServices.db.updateDocument(
           databaseId: AppwriteConfig.databaseId,
           collectionId: AppwriteConfig.lyricsCollection,
-          documentId: idDocuments,
+          documentId: userDoc.documents[0].$id,
           data: {
-            'lyrics': [],
+            'lyrics': [
+              ...[userDoc.documents[0].data['lyrics']],
+              lyricsDoc.data,
+            ],
           });
       return {
         'success': true,
