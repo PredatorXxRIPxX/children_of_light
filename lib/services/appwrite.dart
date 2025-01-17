@@ -299,22 +299,26 @@ class AppwriteServices {
     }
   }
 
-  static Future<Map<String, dynamic>> setLyricsToFav(Document lyricsDoc) async {
+  static Future<Map<String, dynamic>> setLyricsToFav(
+      Document lyricsDoc, String iduser) async {
     try {
-      final user = await account.get();
-      final userDoc = await AppwriteServices.db.listDocuments(
+      final currentdata = await AppwriteServices.db.getDocument(
           databaseId: AppwriteConfig.databaseId,
           collectionId: AppwriteConfig.userCollection,
-          queries: [Query.equal('email', user.email)]);
+          documentId: iduser);
       final response = await AppwriteServices.db.updateDocument(
           databaseId: AppwriteConfig.databaseId,
-          collectionId: AppwriteConfig.lyricsCollection,
-          documentId: userDoc.documents[0].$id,
+          collectionId: AppwriteConfig.userCollection,
+          documentId: iduser,
           data: {
             'lyrics': [
-              ...[userDoc.documents[0].data['lyrics']],
-              lyricsDoc.data,
-            ],
+              ...currentdata.data['lyrics'],
+              {
+                'id_lyrics':lyricsDoc.$id,
+                'name': lyricsDoc.data['name'],
+                'url_file': lyricsDoc.data['url_file'],
+              }
+            ]
           });
       return {
         'success': true,

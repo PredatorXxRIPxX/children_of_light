@@ -106,7 +106,7 @@ class _LyricsState extends State<Lyrics> {
     } else {
       try {
         final result = await AppwriteServices.getLyricsQuery(query);
-        print(result.toString());
+
         setState(() {
           _lyrics = result.entries.last.value;
           _error = null;
@@ -177,7 +177,11 @@ class _LyricItemState extends State<_LyricItem> {
 
   Future<void> _onFavoriteToggle() async {
     try {
-      final response = await AppwriteServices.setLyricsToFav(widget.lyric);
+      final userid = await AppwriteServices.getCurrentUser()
+          .then((value) => value.entries.last.value)
+          .then((value) => value['\$id']);
+      final response =
+          await AppwriteServices.setLyricsToFav(widget.lyric, userid);
       if (response['success']) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(

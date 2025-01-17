@@ -90,6 +90,10 @@ class _LyricsPageState extends State<LyricsPage> {
                 );
               },
             ),
+          IconButton(
+              onPressed: () {},
+              icon: HugeIcon(
+                  icon: HugeIcons.strokeRoundedFavourite, color: Colors.black))
         ],
       ),
       body: _buildBody(),
