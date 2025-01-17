@@ -66,8 +66,18 @@ class _SignInPageState extends State<SignInPage> {
   Future<void> _checkSession() async {
     final Map<String, dynamic> response =
         await AppwriteServices.getCurrentSession();
+    
     final message = response['success'];
+    
+    final user = await AppwriteServices.getCurrentUser();
+    
+    final username = await AppwriteServices.getUsername(email: user.entries.last.value['email']);
+    
     if (message == true) {
+      
+      userprovider.setEmail(user.entries.last.value['email']);
+      userprovider.setUsername(username.entries.last.value);
+      
       Navigator.of(context).pushReplacement(
         MaterialPageRoute(
           builder: (context) => const MainPage(),

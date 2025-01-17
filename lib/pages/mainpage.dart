@@ -2,9 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:hugeicons/hugeicons.dart';
 import 'package:lumiers/pages/lyrics.dart';
 import 'package:lumiers/pages/profile.dart';
-import 'package:lumiers/services/appwrite.dart';
-import 'package:lumiers/utils/user_provider.dart';
-import 'package:provider/provider.dart';
 
 class MainPage extends StatefulWidget {
   const MainPage({super.key});
@@ -16,7 +13,6 @@ class MainPage extends StatefulWidget {
 class _MainPageState extends State<MainPage> {
   int _selectedIndex = 0;
   final PageController _pageController = PageController();
-  late UserProvider _userProvider ;
 
   static const List<NavigationItem> _navigationItems = [
     NavigationItem(
@@ -47,21 +43,6 @@ class _MainPageState extends State<MainPage> {
       _selectedIndex = index;
       _pageController.jumpToPage(index);
     });
-  }
-
-  Future<void> _initializeUser() async {
-    final user = await AppwriteServices.getCurrentUser();
-    final username = await AppwriteServices.getUsername(email: user.entries.last.value['email']);
-    _userProvider.setUsername(username.entries.last.value['username']);
-    _userProvider.setEmail(user.entries.last.value['email']);
-    
-  }
-
-  @override
-  void initState() {
-    _userProvider = Provider.of<UserProvider>(context, listen: false);
-    _initializeUser();
-    super.initState();
   }
 
   @override
