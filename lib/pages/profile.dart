@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:hugeicons/hugeicons.dart';
 import 'package:lumiers/auth/signin.dart';
 import 'package:lumiers/pages/editProfile.dart';
+import 'package:lumiers/pages/listDownloads.dart';
+import 'package:lumiers/pages/listfav.dart';
 import 'package:lumiers/utils/user_provider.dart';
 import 'package:provider/provider.dart';
 
@@ -137,24 +139,35 @@ class _ProfileState extends State<Profile> {
         padding: const EdgeInsets.all(16),
         child: Column(
           children: [
-            _buildDetailItem(
-              icon: HugeIcon(
-                icon: HugeIcons.strokeRoundedStarCircle,
-                color: Colors.blueAccent,
-                size: 24.0,
+            GestureDetector(
+              child: _buildDetailItem(
+                icon: HugeIcon(
+                  icon: HugeIcons.strokeRoundedStarCircle,
+                  color: Colors.blueAccent,
+                  size: 24.0,
+                ),
+                label: 'Favorites',
+                value: 'Vos chants et quantines préférés',
               ),
-              label: 'Favorites',
-              value: 'Vos chants et quantines préférés',
+              onTap: () {
+                Navigator.of(context).push(MaterialPageRoute(builder: (context) => const Listfav()));
+              },
             ),
             const Divider(height: 24),
-            _buildDetailItem(
-              icon: HugeIcon(
-                icon: HugeIcons.strokeRoundedDownload04,
-                color: Colors.greenAccent,
-                size: 24.0,
+            
+            GestureDetector(
+              child: _buildDetailItem(
+                icon: HugeIcon(
+                  icon: HugeIcons.strokeRoundedDownload04,
+                  color: Colors.greenAccent,
+                  size: 24.0,
+                ),
+                label: 'Téléchargements',
+                value: 'Vos chants et quantines téléchargés',
               ),
-              label: 'Téléchargements',
-              value: 'Vos chants et quantines téléchargés',
+              onTap: () {
+                Navigator.of(context).push(MaterialPageRoute(builder: (context) => const Listdownloads()));
+              },
             ),
           ],
         ),
