@@ -41,10 +41,9 @@ class _SignInPageState extends State<SignInPage> {
       if (message == true) {
         final username =
             await AppwriteServices.getUsername(email: _emailController.text);
-            
+
         userprovider.setEmail(_emailController.text);
         userprovider.setUsername(username['username']);
-      
 
         Navigator.of(context).pushReplacement(
           MaterialPageRoute(
@@ -66,18 +65,18 @@ class _SignInPageState extends State<SignInPage> {
   Future<void> _checkSession() async {
     final Map<String, dynamic> response =
         await AppwriteServices.getCurrentSession();
-    
+
     final message = response['success'];
-    
+
     final user = await AppwriteServices.getCurrentUser();
-    
-    final username = await AppwriteServices.getUsername(email: user.entries.last.value['email']);
-    
+
+    final username = await AppwriteServices.getUsername(
+        email: user.entries.last.value['email']);
+
     if (message == true) {
-      
       userprovider.setEmail(user.entries.last.value['email']);
       userprovider.setUsername(username.entries.last.value);
-      
+
       Navigator.of(context).pushReplacement(
         MaterialPageRoute(
           builder: (context) => const MainPage(),
@@ -104,8 +103,8 @@ class _SignInPageState extends State<SignInPage> {
               begin: Alignment.topCenter,
               end: Alignment.bottomCenter,
               colors: [
-                Colors.deepPurple.shade50,
-                Colors.white,
+                Theme.of(context).colorScheme.secondary,
+                Theme.of(context).colorScheme.secondary.withOpacity(0.8),
               ],
             ),
           ),
@@ -121,7 +120,7 @@ class _SignInPageState extends State<SignInPage> {
                     'Bienvenue',
                     style: Theme.of(context).textTheme.headlineMedium?.copyWith(
                           fontWeight: FontWeight.bold,
-                          color: Colors.deepPurple,
+                          color: Theme.of(context).primaryColor,
                         ),
                   ),
                   const SizedBox(height: 8),
@@ -144,13 +143,17 @@ class _SignInPageState extends State<SignInPage> {
                           decoration: InputDecoration(
                             labelText: 'Email',
                             hintText: 'Enter votre email',
-                            prefixIcon: const Icon(Icons.email_outlined),
+                            prefixIcon: Icon(
+                              Icons.email_outlined,
+                              color: Theme.of(context).colorScheme.primary,
+                            ),
                             border: OutlineInputBorder(
                               borderRadius: BorderRadius.circular(12),
                             ),
                             enabledBorder: OutlineInputBorder(
                               borderRadius: BorderRadius.circular(12),
-                              borderSide: BorderSide(color: Colors.grey[300]!),
+                              borderSide: BorderSide(
+                                  color: Theme.of(context).colorScheme.primary),
                             ),
                           ),
                           validator: (value) {
@@ -167,12 +170,16 @@ class _SignInPageState extends State<SignInPage> {
                           decoration: InputDecoration(
                             labelText: 'mot de passe',
                             hintText: 'Enter votre mot de passe',
-                            prefixIcon: const Icon(Icons.lock_outline),
+                            prefixIcon: Icon(
+                              Icons.lock_outline,
+                              color: Theme.of(context).colorScheme.primary,
+                            ),
                             suffixIcon: IconButton(
                               icon: Icon(
                                 _isPasswordVisible
                                     ? Icons.visibility_off
                                     : Icons.visibility,
+                                  color: Theme.of(context).colorScheme.primary,
                               ),
                               onPressed: () {
                                 setState(() {
@@ -185,7 +192,8 @@ class _SignInPageState extends State<SignInPage> {
                             ),
                             enabledBorder: OutlineInputBorder(
                               borderRadius: BorderRadius.circular(12),
-                              borderSide: BorderSide(color: Colors.grey[300]!),
+                              borderSide: BorderSide(
+                                  color: Theme.of(context).colorScheme.primary),
                             ),
                           ),
                           validator: (value) {
@@ -231,7 +239,7 @@ class _SignInPageState extends State<SignInPage> {
                           child: ElevatedButton(
                             onPressed: _isLoading ? null : _handleSignIn,
                             style: ElevatedButton.styleFrom(
-                              backgroundColor: Colors.deepPurple,
+                              backgroundColor: Theme.of(context).primaryColor,
                               shape: RoundedRectangleBorder(
                                 borderRadius: BorderRadius.circular(12),
                               ),
@@ -273,8 +281,8 @@ class _SignInPageState extends State<SignInPage> {
                           children: [
                             TextSpan(
                               text: 'S\'inscrire',
-                              style: const TextStyle(
-                                color: Colors.deepPurple,
+                              style: TextStyle(
+                                color: Theme.of(context).primaryColor,
                                 fontWeight: FontWeight.bold,
                               ),
                             ),

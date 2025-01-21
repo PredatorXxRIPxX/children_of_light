@@ -72,7 +72,7 @@ class _SignUpPageState extends State<SignUpPage> {
             gradient: LinearGradient(
               begin: Alignment.topCenter,
               end: Alignment.bottomCenter,
-              colors: [Colors.deepPurple.shade50, Colors.white],
+              colors: [Theme.of(context).colorScheme.secondary,Theme.of(context).colorScheme.secondary.withOpacity(0.8)],
             ),
           ),
           child: SafeArea(
@@ -86,7 +86,7 @@ class _SignUpPageState extends State<SignUpPage> {
                     'Creation de votre compte',
                     style: Theme.of(context).textTheme.headlineMedium?.copyWith(
                           fontWeight: FontWeight.bold,
-                          color: Colors.deepPurple,
+                          color: Theme.of(context).colorScheme.primary,
                         ),
                   ),
                   const SizedBox(height: 8),
@@ -175,7 +175,7 @@ class _SignUpPageState extends State<SignUpPage> {
                                 ? null
                                 : _handleSignUp,
                             style: ElevatedButton.styleFrom(
-                              backgroundColor: Colors.deepPurple, 
+                              backgroundColor: Theme.of(context).colorScheme.primary, 
                               shape: RoundedRectangleBorder(
                                 borderRadius: BorderRadius.circular(12),
                               ),
@@ -215,11 +215,11 @@ class _SignUpPageState extends State<SignUpPage> {
                         text: TextSpan(
                           text: 'Vous avez déjà un compte ? ',
                           style: TextStyle(color: Colors.grey[600]),
-                          children: const [
+                          children:[
                             TextSpan(
                               text: 'Connectez-vous',
                               style: TextStyle(
-                                color: Colors.deepPurple,
+                                color: Theme.of(context).colorScheme.primary,
                                 fontWeight: FontWeight.bold,
                               ),
                             ),
@@ -255,13 +255,14 @@ class _SignUpPageState extends State<SignUpPage> {
       decoration: InputDecoration(
         labelText: label,
         hintText: hint,
-        prefixIcon: Icon(icon),
+        prefixIcon: Icon(icon,color: Theme.of(context).colorScheme.primary,),
         suffixIcon: isPassword
             ? IconButton(
                 icon: Icon(
                   isPasswordVisible ?? false
                       ? Icons.visibility_off
                       : Icons.visibility,
+                    color: Theme.of(context).colorScheme.primary,
                 ),
                 onPressed: onTogglePassword,
               )
@@ -271,7 +272,7 @@ class _SignUpPageState extends State<SignUpPage> {
         ),
         enabledBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
-          borderSide: BorderSide(color: Colors.grey[300]!),
+          borderSide: BorderSide(color: Theme.of(context).colorScheme.primary),
         ),
       ),
       validator: validator,
