@@ -1,6 +1,6 @@
 import 'package:appwrite/appwrite.dart';
 import 'package:appwrite/models.dart';
-import 'package:lumiers/pages/lyrics.dart';
+
 
 class AppwriteConfig {
   static const String projectId = '677ee4b3003777fc3095';
@@ -151,7 +151,7 @@ class AppwriteServices {
       final response = await account.createVerification(
         url: 'internal',
       );
-
+      print('sendVerification:'+response.toString());
       return {
         'success': true,
         'message': 'Recovery email sent',
@@ -180,7 +180,7 @@ class AppwriteServices {
         userId: 'current',
         secret: code,
       );
-
+      print('verify:'+response.toString());
       return {
         'success': true,
         'message': 'Account verified',
@@ -329,6 +329,33 @@ class AppwriteServices {
       return {
         'success': false,
         'message': e.toString(),
+      };
+    }
+  }
+
+
+  static Future <Map<String,dynamic>> updateProfile({
+    String username = '',
+    String email = '',
+    String password = '',
+  }) async {
+    try {
+      var response = null;
+      if (username.isNotEmpty) {
+        response = await AppwriteServices.account.updateName(name: username);
+      }
+      if (email.isNotEmpty&&password.isNotEmpty) {
+        response = await AppwriteServices.account.updateEmail(email: email, password: password);
+      }
+      return {
+        'success': true,
+        'message': 'Profile updated successfully',
+        'response': response,
+      };
+    } catch (e) {
+      return {
+        'success': false,
+        'message': e.toString(),        
       };
     }
   }

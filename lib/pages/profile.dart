@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:hugeicons/hugeicons.dart';
 import 'package:lumiers/auth/signin.dart';
+import 'package:lumiers/pages/editProfile.dart';
 import 'package:lumiers/utils/user_provider.dart';
 import 'package:provider/provider.dart';
 
@@ -20,7 +21,6 @@ class _ProfileState extends State<Profile> {
     userProvider = Provider.of<UserProvider>(context, listen: false);
   }
 
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -28,13 +28,14 @@ class _ProfileState extends State<Profile> {
         builder: (context, userProvider, _) {
           return CustomScrollView(
             slivers: [
-              _buildSliverAppBar(),
+              _buildSliverAppBar(context),
               SliverToBoxAdapter(
                 child: Padding(
                   padding: const EdgeInsets.all(16),
                   child: Column(
                     children: [
                       _buildProfileInfo(),
+                      const SizedBox(height: 24),
                       _buildUserDetailsCard(),
                       const SizedBox(height: 24),
                       _buildActionButtons(),
@@ -49,7 +50,7 @@ class _ProfileState extends State<Profile> {
     );
   }
 
-  Widget _buildSliverAppBar() {
+  Widget _buildSliverAppBar(BuildContext context) {
     return SliverAppBar(
       expandedHeight: 100,
       floating: false,
@@ -60,7 +61,7 @@ class _ProfileState extends State<Profile> {
             gradient: LinearGradient(
               begin: Alignment.topLeft,
               end: Alignment.bottomRight,
-              colors: [Colors.purple, Colors.lightBlue],
+              colors: [Colors.blueAccent, Colors.purpleAccent],
             ),
           ),
         ),
@@ -88,7 +89,14 @@ class _ProfileState extends State<Profile> {
               padding: const EdgeInsets.all(4),
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
-                border: Border.all(color: Colors.blue, width: 2),
+                border: Border.all(color: Colors.white, width: 4),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withOpacity(0.2),
+                    blurRadius: 8,
+                    offset: const Offset(0, 4),
+                  ),
+                ],
               ),
               child: CircleAvatar(
                 radius: 60,
@@ -99,12 +107,12 @@ class _ProfileState extends State<Profile> {
             ),
             CircleAvatar(
               radius: 20,
-              backgroundColor: Colors.blue,
+              backgroundColor: Colors.blueAccent,
               child: IconButton(
                 icon:
-                    const Icon(Icons.camera_alt, color: Colors.white, size: 20),
+                    const Icon(Icons.camera_alt, color: Colors.white, size: 16),
                 onPressed: () {
-            
+                  // Handle camera icon press
                 },
               ),
             ),
@@ -115,6 +123,7 @@ class _ProfileState extends State<Profile> {
           userProvider.username,
           style: Theme.of(context).textTheme.headlineMedium?.copyWith(
                 fontWeight: FontWeight.bold,
+                color: Colors.black87,
               ),
         ),
         const SizedBox(height: 8),
@@ -128,10 +137,10 @@ class _ProfileState extends State<Profile> {
     );
   }
 
-
   Widget _buildUserDetailsCard() {
     return Card(
-      elevation: 2,
+      color: Colors.white,
+      elevation: 4,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
       child: Padding(
         padding: const EdgeInsets.all(16),
@@ -140,17 +149,17 @@ class _ProfileState extends State<Profile> {
             _buildDetailItem(
               icon: HugeIcon(
                 icon: HugeIcons.strokeRoundedStarCircle,
-                color: Colors.blue,
+                color: Colors.blueAccent,
                 size: 24.0,
               ),
-              label: 'Favories',
-              value: 'Vos chants et quantines preférés',
+              label: 'Favorites',
+              value: 'Vos chants et quantines préférés',
             ),
             const Divider(height: 24),
             _buildDetailItem(
               icon: HugeIcon(
                 icon: HugeIcons.strokeRoundedDownload04,
-                color: Colors.green,
+                color: Colors.greenAccent,
                 size: 24.0,
               ),
               label: 'Téléchargements',
@@ -172,6 +181,7 @@ class _ProfileState extends State<Profile> {
         Container(
           padding: const EdgeInsets.all(8),
           decoration: BoxDecoration(
+            color: Colors.grey[100],
             borderRadius: BorderRadius.circular(8),
           ),
           child: icon,
@@ -194,6 +204,7 @@ class _ProfileState extends State<Profile> {
                 style: const TextStyle(
                   fontSize: 16,
                   fontWeight: FontWeight.bold,
+                  color: Colors.black87,
                 ),
               ),
             ],
@@ -209,9 +220,12 @@ class _ProfileState extends State<Profile> {
         _buildActionButton(
           icon: Icons.edit,
           label: 'Edit Profile',
-          onPressed: () {},
+          onPressed: () {
+            Navigator.of(context).push(
+                MaterialPageRoute(builder: (context) => const EditProfile()));
+          },
           gradient: const LinearGradient(
-            colors: [Colors.blue, Colors.lightBlue],
+            colors: [Colors.blueAccent, Colors.purpleAccent],
           ),
         ),
         const SizedBox(height: 12),
@@ -227,7 +241,7 @@ class _ProfileState extends State<Profile> {
             );
           },
           gradient: const LinearGradient(
-            colors: [Colors.red, Colors.redAccent],
+            colors: [Colors.redAccent, Colors.orangeAccent],
           ),
         ),
       ],

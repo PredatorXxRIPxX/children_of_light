@@ -36,7 +36,7 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
           content: Text(result['message']),
           backgroundColor: Colors.red,
         ));
-      }else {
+      } else {
         ScaffoldMessenger.of(context).showSnackBar(SnackBar(
           content: Text(result['message']),
           backgroundColor: Colors.green,
