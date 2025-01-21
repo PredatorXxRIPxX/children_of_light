@@ -104,10 +104,10 @@ class _EditProfileState extends State<EditProfile> {
   }
 
   bool _hasRequiredPasswordCharacters(String value) {
-    return value.contains(RegExp(r'[A-Z]')) && 
-        value.contains(RegExp(r'[a-z]')) && 
-        value.contains(RegExp(r'[0-9]')) && 
-        value.contains(RegExp(r'[!@#$%^&*(),.?":{}|<>]')); 
+    return value.contains(RegExp(r'[A-Z]')) &&
+        value.contains(RegExp(r'[a-z]')) &&
+        value.contains(RegExp(r'[0-9]')) &&
+        value.contains(RegExp(r'[!@#$%^&*(),.?":{}|<>]'));
   }
 
   Future<void> _pickImage(ImageSource source) async {
@@ -157,7 +157,6 @@ class _EditProfileState extends State<EditProfile> {
         return;
       }
 
-      // Pick image if permission granted
       final XFile? image = await _imagePicker.pickImage(
         source: source,
         maxWidth: 800,
@@ -216,8 +215,6 @@ class _EditProfileState extends State<EditProfile> {
 
     try {
       final userProvider = context.read<UserProvider>();
-
-     
 
       if (mounted) {
         _showSuccessSnackBar('Profile updated successfully');

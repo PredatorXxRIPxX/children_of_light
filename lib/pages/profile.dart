@@ -57,11 +57,11 @@ class _ProfileState extends State<Profile> {
       pinned: true,
       flexibleSpace: FlexibleSpaceBar(
         background: Container(
-          decoration: const BoxDecoration(
+          decoration: BoxDecoration(
             gradient: LinearGradient(
               begin: Alignment.topLeft,
               end: Alignment.bottomRight,
-              colors: [Colors.blueAccent, Colors.purpleAccent],
+              colors: [Theme.of(context).colorScheme.primary, Theme.of(context).colorScheme.secondary],
             ),
           ),
         ),
@@ -70,8 +70,8 @@ class _ProfileState extends State<Profile> {
         preferredSize: const Size.fromHeight(0),
         child: Container(
           height: 32,
-          decoration: const BoxDecoration(
-            color: Colors.white,
+          decoration: BoxDecoration(
+            color: Theme.of(context).colorScheme.secondary,
             borderRadius: BorderRadius.vertical(top: Radius.circular(32)),
           ),
         ),
@@ -83,13 +83,12 @@ class _ProfileState extends State<Profile> {
     return Column(
       children: [
         Stack(
-          alignment: Alignment.bottomRight,
           children: [
             Container(
               padding: const EdgeInsets.all(4),
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
-                border: Border.all(color: Colors.white, width: 4),
+                border: Border.all(color: Theme.of(context).colorScheme.primary, width: 4),
                 boxShadow: [
                   BoxShadow(
                     color: Colors.black.withOpacity(0.2),
@@ -100,20 +99,12 @@ class _ProfileState extends State<Profile> {
               ),
               child: CircleAvatar(
                 radius: 60,
-                backgroundImage: NetworkImage(
-                  'https://via.placeholder.com/150',
+                backgroundColor: Theme.of(context).colorScheme.primary,
+                child: Icon(
+                  Icons.person,
+                  size: 100,
+                  color: Theme.of(context).colorScheme.secondary,
                 ),
-              ),
-            ),
-            CircleAvatar(
-              radius: 20,
-              backgroundColor: Colors.blueAccent,
-              child: IconButton(
-                icon:
-                    const Icon(Icons.camera_alt, color: Colors.white, size: 16),
-                onPressed: () {
-                  // Handle camera icon press
-                },
               ),
             ),
           ],
@@ -224,9 +215,8 @@ class _ProfileState extends State<Profile> {
             Navigator.of(context).push(
                 MaterialPageRoute(builder: (context) => const EditProfile()));
           },
-          gradient: const LinearGradient(
-            colors: [Colors.blueAccent, Colors.purpleAccent],
-          ),
+          primary: Theme.of(context).colorScheme.primary,
+          secondary: Colors.white,
         ),
         const SizedBox(height: 12),
         _buildActionButton(
@@ -240,9 +230,8 @@ class _ProfileState extends State<Profile> {
               ),
             );
           },
-          gradient: const LinearGradient(
-            colors: [Colors.redAccent, Colors.orangeAccent],
-          ),
+          primary: Colors.redAccent,
+          secondary: Colors.white,
         ),
       ],
     );
@@ -252,13 +241,14 @@ class _ProfileState extends State<Profile> {
     required IconData icon,
     required String label,
     required VoidCallback onPressed,
-    required Gradient gradient,
+    required Color primary,
+    required Color secondary,
   }) {
     return Container(
       width: double.infinity,
       height: 56,
       decoration: BoxDecoration(
-        gradient: gradient,
+        color: primary,
         borderRadius: BorderRadius.circular(16),
         boxShadow: [
           BoxShadow(
@@ -278,12 +268,12 @@ class _ProfileState extends State<Profile> {
             borderRadius: BorderRadius.circular(16),
           ),
         ),
-        icon: Icon(icon, color: Colors.white),
+        icon: Icon(icon, color: secondary),
         label: Text(
           label,
-          style: const TextStyle(
+          style: TextStyle(
             fontSize: 16,
-            color: Colors.white,
+            color: secondary,
             fontWeight: FontWeight.bold,
           ),
         ),
