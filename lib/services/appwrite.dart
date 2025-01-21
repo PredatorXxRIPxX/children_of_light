@@ -1,5 +1,6 @@
 import 'package:appwrite/appwrite.dart';
 import 'package:appwrite/models.dart';
+import 'package:lumiers/pages/lyrics.dart';
 
 
 class AppwriteConfig {
@@ -356,6 +357,33 @@ class AppwriteServices {
       return {
         'success': false,
         'message': e.toString(),        
+      };
+    }
+  }
+
+  static Future <Map<String,dynamic>> getFavlist(String iduser) async {
+    try {
+      final response = await AppwriteServices.db.getDocument(
+          databaseId: AppwriteConfig.databaseId,
+          collectionId: AppwriteConfig.userCollection,
+          documentId: iduser,
+          );
+      
+      final lyrics = response.data['lyrics'];
+      final musics = response.data['musics'];
+
+      return {
+        'success': true,
+        'message': 'Favorite list retrieved successfully',
+        'response': {
+          'lyrics': lyrics,
+          'musics': musics,
+        },
+      };
+    } catch (e) {
+      return {
+        'success': false,
+        'message': e.toString(),
       };
     }
   }
