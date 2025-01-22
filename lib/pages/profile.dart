@@ -150,7 +150,7 @@ class _ProfileState extends State<Profile> {
                 value: 'Vos chants et quantines préférés',
               ),
               onTap: () {
-                Navigator.of(context).push(MaterialPageRoute(builder: (context) => const Listfav()));
+                Navigator.of(context).push(MaterialPageRoute(builder: (context) => ListFav()));
               },
             ),
             const Divider(height: 24),

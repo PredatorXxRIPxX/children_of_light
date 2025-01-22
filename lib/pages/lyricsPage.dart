@@ -4,6 +4,8 @@ import 'package:hugeicons/hugeicons.dart';
 import 'dart:convert';
 
 import 'package:lumiers/services/appwrite.dart';
+import 'package:lumiers/utils/user_provider.dart';
+import 'package:provider/provider.dart';
 
 class LyricsPage extends StatefulWidget {
   final String title;
@@ -23,11 +25,36 @@ class _LyricsPageState extends State<LyricsPage> {
   String? _lyrics;
   String? _error;
   bool _isLoading = true;
+  bool isFav = false;
+  late UserProvider _userProvider;
+
+  Future <void> _checkFav() async {
+    try {
+      final userid = await AppwriteServices.getCurrentUser()
+          .then((value) => value.entries.last.value['\$id']);
+      final favListLyrics = await AppwriteServices.getFavlist(userid).then((value)=>value.entries.last.value['lyrics']);
+      print(favListLyrics);
+
+      if (favListLyrics.contains(widget.title)) {
+        setState(() {
+          isFav = true;
+        });
+      }
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Could not check favorite: ${e.toString()}'),
+        ),
+      );
+    }
+  }
 
   @override
   void initState() {
     super.initState();
     _fetchLyrics();
+    _userProvider = Provider.of<UserProvider>(context, listen: false);
+    _checkFav();
   }
 
   Future<void> _fetchLyrics() async {
@@ -66,11 +93,13 @@ class _LyricsPageState extends State<LyricsPage> {
     return Scaffold(
       appBar: AppBar(
         title: Text(widget.title),
+        backgroundColor: Theme.of(context).colorScheme.primary,
+        foregroundColor: Colors.white,
         actions: [
           if (!_isLoading)
             IconButton(
               icon: HugeIcon(
-                  icon: HugeIcons.strokeRoundedDownload02, color: Colors.black),
+                  icon: HugeIcons.strokeRoundedDownload02, color: Colors.white),
               onPressed: () async {
                 final response = await AppwriteServices.storage.listFiles(
                     bucketId: AppwriteConfig.storage, search: widget.fileUrl);
@@ -91,9 +120,11 @@ class _LyricsPageState extends State<LyricsPage> {
               },
             ),
           IconButton(
-              onPressed: () {},
-              icon: HugeIcon(
-                  icon: HugeIcons.strokeRoundedFavourite, color: Colors.black))
+              onPressed: () {
+
+              },
+              icon: Icon(isFav ? Icons.favorite : Icons.favorite_border) 
+            )
         ],
       ),
       body: _buildBody(),

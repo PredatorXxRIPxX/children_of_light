@@ -98,7 +98,7 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
             gradient: LinearGradient(
               begin: Alignment.topCenter,
               end: Alignment.bottomCenter,
-              colors: [Colors.deepPurple.shade50, Colors.white],
+              colors: [Theme.of(context).colorScheme.secondary, Theme.of(context).colorScheme.secondary.withOpacity(0.8)],
             ),
           ),
           child: SafeArea(
@@ -116,7 +116,7 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
                     'Reset Password',
                     style: Theme.of(context).textTheme.headlineMedium?.copyWith(
                           fontWeight: FontWeight.bold,
-                          color: Colors.deepPurple,
+                          color: Theme.of(context).colorScheme.primary,
                         ),
                   ),
                   const SizedBox(height: 8),
@@ -141,7 +141,7 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
                           child: ElevatedButton(
                             onPressed: _isLoading ? null : _handleSubmission,
                             style: ElevatedButton.styleFrom(
-                              backgroundColor: Colors.deepPurple,
+                              backgroundColor: Theme.of(context).colorScheme.primary,
                               shape: RoundedRectangleBorder(
                                 borderRadius: BorderRadius.circular(12),
                               ),
@@ -183,11 +183,11 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
       decoration: InputDecoration(
         labelText: 'Email',
         hintText: 'Enter votre email',
-        prefixIcon: const Icon(Icons.email_outlined),
+        prefixIcon: Icon(Icons.email_outlined,color: Theme.of(context).colorScheme.primary,),
         border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
         enabledBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
-          borderSide: BorderSide(color: Colors.grey[300]!),
+          borderSide: BorderSide(color: Theme.of(context).colorScheme.primary.withOpacity(0.8)),
         ),
       ),
       validator: (value) => value?.isEmpty ?? true
@@ -203,11 +203,11 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
       decoration: InputDecoration(
         labelText: 'Verification de Code',
         hintText: 'Enter le code envoyé à votre email',
-        prefixIcon: const Icon(Icons.lock_outline),
+        prefixIcon: Icon(Icons.lock_outline,color: Theme.of(context).colorScheme.primary,),
         border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
         enabledBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
-          borderSide: BorderSide(color: Colors.grey[300]!),
+          borderSide: BorderSide(color: Theme.of(context).colorScheme.primary.withOpacity(0.8)),
         ),
       ),
       validator: (value) =>
@@ -249,11 +249,11 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
           decoration: InputDecoration(
             labelText: 'Confirmez votre mot de passe',
             hintText: 'Confirmez votre mot de passe',
-            prefixIcon: const Icon(Icons.lock_outline),
+            prefixIcon:Icon(Icons.lock_outline,color: Theme.of(context).colorScheme.primary,),
             border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
             enabledBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(12),
-              borderSide: BorderSide(color: Colors.grey[300]!),
+              borderSide: BorderSide(color: Theme.of(context).colorScheme.primary.withOpacity(0.8)),
             ),
           ),
           validator: (value) {
