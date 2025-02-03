@@ -4,12 +4,12 @@ import 'package:just_audio/just_audio.dart';
 import 'package:audio_video_progress_bar/audio_video_progress_bar.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 
-class Musicpage extends StatefulWidget {
+class MusicPage extends StatefulWidget {
   final String name;
   final String fileUrl;
   final String? imageUrl;
 
-  const Musicpage({
+  const MusicPage({
     super.key,
     required this.name,
     required this.fileUrl,
@@ -17,16 +17,17 @@ class Musicpage extends StatefulWidget {
   });
 
   @override
-  State<Musicpage> createState() => _MusicpageState();
+  State<MusicPage> createState() => _MusicPageState();
 }
 
-class _MusicpageState extends State<Musicpage>
+class _MusicPageState extends State<MusicPage>
     with SingleTickerProviderStateMixin {
   late AudioPlayer _player;
   late AnimationController _animationController;
   bool _isPlaying = false;
   Duration _duration = Duration.zero;
   Duration _position = Duration.zero;
+  Duration _bufferedPosition = Duration.zero;
 
   @override
   void initState() {
@@ -43,26 +44,39 @@ class _MusicpageState extends State<Musicpage>
 
   Future<void> _setupAudioPlayer() async {
     try {
-      await _player.setUrl(widget.fileUrl);
-      
-      // Listen to duration changes
-      _player.durationStream.listen((duration) {
-        setState(() {
-          _duration = duration ?? Duration.zero;
-        });
+      await _player.setUrl(widget.fileUrl).whenComplete(() {
+        _player.play();
+      });
+      _player.playbackEventStream.listen((event) {},
+          onError: (Object e, StackTrace st) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Error: $e'),
+            backgroundColor: Colors.red,
+          ),
+        );
       });
 
-      // Listen to position changes
-      _player.positionStream.listen((position) {
-        setState(() {
-          _position = position;
-        });
+      _player.durationStream.distinct().listen((duration) {
+        setState(() => _duration = duration ?? Duration.zero);
       });
 
-      // Listen to player state
-      _player.playerStateStream.listen((state) {
+      _player.positionStream.distinct().listen((position) {
+        setState(() => _position = position);
+      });
+
+      _player.bufferedPositionStream.distinct().listen((position) {
+        setState(() => _bufferedPosition = position);
+      });
+
+      _player.playerStateStream.distinct().listen((state) {
         setState(() {
           _isPlaying = state.playing;
+          if (state.playing) {
+            _animationController.repeat();
+          } else {
+            _animationController.stop();
+          }
         });
       });
     } catch (e) {
@@ -83,30 +97,25 @@ class _MusicpageState extends State<Musicpage>
   }
 
   void _togglePlayPause() {
-    if (_isPlaying) {
-      _player.pause();
-    } else {
-      _player.play();
-    }
+    _isPlaying ? _player.pause() : _player.play();
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
+        backgroundColor: Theme.of(context).primaryColor,
+        foregroundColor: Colors.white,
         title: Text(widget.name),
         actions: [
-
           IconButton(
             onPressed: () {},
             icon: HugeIcon(
-                icon: HugeIcons.strokeRoundedDownload02, color: Colors.black),
+                icon: HugeIcons.strokeRoundedDownload02, color: Colors.white),
           ),
           IconButton(
             icon: const Icon(Icons.favorite_border),
-            onPressed: () {
-              // Implement favorite functionality
-            },
+            onPressed: () {},
           ),
         ],
       ),
@@ -114,35 +123,40 @@ class _MusicpageState extends State<Musicpage>
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
           Center(
-            child: RotationTransition(
-              turns: _animationController,
-              child: Container(
-                width: 300,
-                height: 300,
-                decoration: BoxDecoration(
-                  shape: BoxShape.circle,
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.black.withOpacity(0.2),
-                      blurRadius: 20,
-                      spreadRadius: 5,
-                    )
-                  ],
-                ),
-                child: ClipOval(
-                  child: widget.imageUrl != null
-                      ? CachedNetworkImage(
-                          imageUrl: widget.imageUrl!,
-                          fit: BoxFit.cover,
-                          placeholder: (context, url) => const Center(
-                            child: CircularProgressIndicator(),
-                          ),
-                          errorWidget: (context, url, error) =>
-                              _defaultAlbumArt(),
+            child: AnimatedBuilder(
+              animation: _animationController,
+              builder: (context, child) {
+                return Transform.rotate(
+                  angle: _animationController.value * 2 * 3.1416,
+                  child: Container(
+                    width: 300,
+                    height: 300,
+                    decoration: BoxDecoration(
+                      shape: BoxShape.circle,
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black.withOpacity(0.2),
+                          blurRadius: 20,
+                          spreadRadius: 5,
                         )
-                      : _defaultAlbumArt(),
-                ),
-              ),
+                      ],
+                    ),
+                    child: ClipOval(
+                      child: widget.imageUrl != null
+                          ? CachedNetworkImage(
+                              imageUrl: widget.imageUrl!,
+                              fit: BoxFit.cover,
+                              placeholder: (context, url) => const Center(
+                                child: CircularProgressIndicator(),
+                              ),
+                              errorWidget: (context, url, error) =>
+                                  _defaultAlbumArt(),
+                            )
+                          : _defaultAlbumArt(),
+                    ),
+                  ),
+                );
+              },
             ),
           ),
           const SizedBox(height: 30),
@@ -158,13 +172,16 @@ class _MusicpageState extends State<Musicpage>
             padding: const EdgeInsets.symmetric(horizontal: 20),
             child: ProgressBar(
               progress: _position,
+              buffered: _bufferedPosition,
               total: _duration,
-              onSeek: (duration) {
-                _player.seek(duration);
-              },
-              barHeight: 5,
-              thumbRadius: 8,
+              onSeek: (duration) => _player.seek(duration),
+              timeLabelLocation: TimeLabelLocation.below,
+              timeLabelType: TimeLabelType.totalTime,
+              barHeight: 10,
+              baseBarColor: Colors.grey[300],
               progressBarColor: Theme.of(context).primaryColor,
+              bufferedBarColor: Colors.grey[400],
+              thumbColor: Theme.of(context).primaryColor,
             ),
           ),
           const SizedBox(height: 20),
@@ -173,9 +190,7 @@ class _MusicpageState extends State<Musicpage>
             children: [
               IconButton(
                 icon: const Icon(Icons.skip_previous, size: 40),
-                onPressed: () {
-                  // Implement previous track
-                },
+                onPressed: () => _player.seekToPrevious(),
               ),
               const SizedBox(width: 20),
               IconButton(
@@ -189,9 +204,7 @@ class _MusicpageState extends State<Musicpage>
               const SizedBox(width: 20),
               IconButton(
                 icon: const Icon(Icons.skip_next, size: 40),
-                onPressed: () {
-                  // Implement next track
-                },
+                onPressed: () => _player.seekToNext(),
               ),
             ],
           ),

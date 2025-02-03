@@ -1,6 +1,5 @@
 import 'package:appwrite/appwrite.dart';
 import 'package:appwrite/models.dart';
-import 'package:lumiers/pages/lyrics.dart';
 
 
 class AppwriteConfig {

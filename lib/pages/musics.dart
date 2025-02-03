@@ -161,7 +161,7 @@ class _MusicsState extends State<Musics> {
                 isFavorite: false,
                 onTap: () => Navigator.of(context).push(
                   MaterialPageRoute(
-                    builder: (context) => Musicpage(
+                    builder: (context) => MusicPage(
                       name: _musics[index].data['name'],
                       fileUrl: _musics[index].data['file_url'],
                     ),

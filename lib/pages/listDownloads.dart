@@ -33,8 +33,8 @@ class _ListdownloadsState extends State<Listdownloads> {
   }
 
   @override
-  void initState() async {
-    _downloadsDirectory = await _checkExistenseDirectory();
+  Future <void> initState() async {
+    _downloadsDirectory =  await _checkExistenseDirectory();
     super.initState();
   }
 
