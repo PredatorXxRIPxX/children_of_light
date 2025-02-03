@@ -42,6 +42,10 @@ dependencies:
   shimmer_image: ^0.0.2
   image_picker: ^1.1.2
   permission_handler: ^11.3.1
+  path_provider: ^2.1.5
+  just_audio: ^0.9.45
+  cached_network_image: ^3.4.1
+  audio_video_progress_bar: ^2.0.3
 
 dev_dependencies:
   flutter_test:

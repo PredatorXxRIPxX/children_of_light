@@ -1,9 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:image_picker/image_picker.dart';
-import 'package:permission_handler/permission_handler.dart';
 import 'package:provider/provider.dart';
 import 'package:lumiers/utils/user_provider.dart';
-import 'dart:io';
+
 
 class EditProfile extends StatefulWidget {
   const EditProfile({super.key});
@@ -18,9 +16,7 @@ class _EditProfileState extends State<EditProfile> {
   late final TextEditingController _emailController;
   late final TextEditingController _passwordController;
   late final TextEditingController _confirmPasswordController;
-  late final ImagePicker _imagePicker;
 
-  XFile? _imageFile;
   String? _initialUsername;
   String? _initialEmail;
   bool _isLoading = false;
@@ -44,7 +40,6 @@ class _EditProfileState extends State<EditProfile> {
     _emailController = TextEditingController(text: _initialEmail);
     _passwordController = TextEditingController();
     _confirmPasswordController = TextEditingController();
-    _imagePicker = ImagePicker();
   }
 
   void _setupListeners() {
@@ -71,8 +66,7 @@ class _EditProfileState extends State<EditProfile> {
   void _checkForChanges() {
     final hasTextChanges = _usernameController.text != _initialUsername ||
         _emailController.text != _initialEmail ||
-        _passwordController.text.isNotEmpty ||
-        _imageFile != null;
+        _passwordController.text.isNotEmpty == true;
 
     if (hasTextChanges != _hasChanges) {
       setState(() => _hasChanges = hasTextChanges);
@@ -108,79 +102,6 @@ class _EditProfileState extends State<EditProfile> {
         value.contains(RegExp(r'[a-z]')) &&
         value.contains(RegExp(r'[0-9]')) &&
         value.contains(RegExp(r'[!@#$%^&*(),.?":{}|<>]'));
-  }
-
-  Future<void> _pickImage(ImageSource source) async {
-    try {
-      Permission permission =
-          source == ImageSource.camera ? Permission.camera : Permission.storage;
-
-      PermissionStatus status = await permission.status;
-
-      if (status.isDenied) {
-        status = await permission.request();
-        if (!status.isGranted) {
-          if (mounted) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(
-                content: Text('Permission denied'),
-                backgroundColor: Colors.red,
-              ),
-            );
-          }
-          return;
-        }
-      }
-
-      if (status.isPermanentlyDenied) {
-        if (mounted) {
-          showDialog(
-            context: context,
-            builder: (context) => AlertDialog(
-              title: const Text('Permission Required'),
-              content: Text(source == ImageSource.camera
-                  ? 'Camera permission is required'
-                  : 'Storage permission is required'),
-              actions: [
-                TextButton(
-                  onPressed: () => Navigator.pop(context),
-                  child: const Text('Cancel'),
-                ),
-                TextButton(
-                  onPressed: () => openAppSettings(),
-                  child: const Text('Open Settings'),
-                ),
-              ],
-            ),
-          );
-        }
-        return;
-      }
-
-      final XFile? image = await _imagePicker.pickImage(
-        source: source,
-        maxWidth: 800,
-        maxHeight: 800,
-        imageQuality: 85,
-      );
-
-      if (image != null) {
-        setState(() {
-          _imageFile = image;
-          _hasChanges = true;
-        });
-        Navigator.pop(context);
-      }
-    } catch (e) {
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Error picking image: ${e.toString()}'),
-            backgroundColor: Colors.red,
-          ),
-        );
-      }
-    }
   }
 
   Future<bool> _confirmDiscardChanges() async {
@@ -241,29 +162,6 @@ class _EditProfileState extends State<EditProfile> {
     );
   }
 
-  void _showImagePickerModal() {
-    showModalBottomSheet(
-      context: context,
-      builder: (context) => SafeArea(
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            ListTile(
-              leading: const Icon(Icons.camera_alt_outlined),
-              title: const Text('Take a photo'),
-              onTap: () => _pickImage(ImageSource.camera),
-            ),
-            ListTile(
-              leading: const Icon(Icons.photo_outlined),
-              title: const Text('Choose from gallery'),
-              onTap: () => _pickImage(ImageSource.gallery),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
   @override
   Widget build(BuildContext context) {
     return WillPopScope(
@@ -312,7 +210,6 @@ class _EditProfileState extends State<EditProfile> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              _buildProfileImage(),
               const SizedBox(height: 24),
               _buildBasicInfoSection(),
               const SizedBox(height: 24),
@@ -320,49 +217,6 @@ class _EditProfileState extends State<EditProfile> {
             ],
           ),
         ),
-      ),
-    );
-  }
-
-  Widget _buildProfileImage() {
-    return Center(
-      child: Stack(
-        children: [
-          GestureDetector(
-            onTap: _showImagePickerModal,
-            child: Hero(
-              tag: 'profile-image',
-              child: CircleAvatar(
-                radius: 60,
-                backgroundColor:
-                    Theme.of(context).colorScheme.primary.withOpacity(0.1),
-                backgroundImage: _imageFile != null
-                    ? FileImage(File(_imageFile!.path))
-                    : null,
-                child: _imageFile == null
-                    ? Icon(
-                        Icons.person_outline,
-                        size: 60,
-                        color: Theme.of(context).colorScheme.primary,
-                      )
-                    : null,
-              ),
-            ),
-          ),
-          Positioned(
-            bottom: 0,
-            right: 0,
-            child: Container(
-              padding: const EdgeInsets.all(4),
-              decoration: BoxDecoration(
-                color: Theme.of(context).colorScheme.primary,
-                shape: BoxShape.circle,
-              ),
-              child:
-                  const Icon(Icons.camera_alt, size: 20, color: Colors.white),
-            ),
-          ),
-        ],
       ),
     );
   }

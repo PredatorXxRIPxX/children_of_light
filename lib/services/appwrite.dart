@@ -387,4 +387,47 @@ class AppwriteServices {
       };
     }
   }
+
+  static Future<Map<String, dynamic>>getMusic(int amount) async {
+    try {
+      final documents = await db.listDocuments(
+          databaseId: AppwriteConfig.databaseId,
+          collectionId: AppwriteConfig.musicCollection,
+          queries: [
+            Query.select(['name', 'file_url']),
+            Query.limit(amount),
+          ]);
+      return {
+        'success': true,
+        'message': 'Music retrieved successfully',
+        'response': documents.documents,
+      };
+    } catch (e) {
+      return {
+        'success': false,
+        'message': e.toString(),
+      };
+    }
+  }
+
+  static Future <Map<String,dynamic>> getMusicQuery(String name) async {
+    try {
+      final response = await AppwriteServices.db.listDocuments(
+          databaseId: AppwriteConfig.databaseId,
+          collectionId: AppwriteConfig.musicCollection,
+          queries: [
+            Query.search('name', name),
+          ]);
+      return {
+        'success': true,
+        'message': 'Music retrieved successfully',
+        'response': response.documents,
+      };
+    } catch (e) {
+      return {
+        'success': false,
+        'message': e.toString(),
+      };
+    }
+  }
 }
