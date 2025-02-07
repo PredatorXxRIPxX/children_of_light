@@ -46,6 +46,7 @@ dependencies:
   just_audio: ^0.9.45
   cached_network_image: ^3.4.1
   audio_video_progress_bar: ^2.0.3
+  dio: ^5.8.0+1
 
 dev_dependencies:
   flutter_test:
