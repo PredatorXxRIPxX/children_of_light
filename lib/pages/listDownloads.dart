@@ -4,7 +4,6 @@ import 'package:lumiers/components/musiccontainer.dart';
 import 'package:lumiers/pages/musicPage.dart';
 import 'package:path_provider/path_provider.dart';
 
-
 class Listdownloads extends StatefulWidget {
   const Listdownloads({super.key});
 
@@ -72,17 +71,17 @@ class _ListdownloadsState extends State<Listdownloads> {
                 child: Text('Erreur: ${snapshot.error}'),
               );
             }
-            
+
             if (snapshot.connectionState == ConnectionState.waiting) {
               return const Center(
                 child: CircularProgressIndicator(),
               );
             }
-            
+
             if (snapshot.hasData) {
               final downloadsDirectory = snapshot.data as Directory;
               final files = downloadsDirectory.listSync();
-              
+
               if (files.isEmpty) {
                 return const Center(
                   child: Text(
@@ -91,27 +90,56 @@ class _ListdownloadsState extends State<Listdownloads> {
                   ),
                 );
               }
-              
+
               return ListView.builder(
                 itemCount: files.length,
                 itemBuilder: (context, index) {
                   final file = files[index];
-                  return MusicContainer(
-                    title: file.uri.pathSegments.last.replaceAll('.mp3', ''),
-                    icon: Icons.music_note,
-                    isFavorite: false,
-                    onTap: () => Navigator.of(context).push(MaterialPageRoute(
-                      builder: (context) => MusicPage(
-                        name: file.uri.pathSegments.last.replaceAll('.mp3', ''),
-                        fileUrl: file.path,
-                        localFilePath: file.path,
-                      ),
-                    )),
+                  return GestureDetector(
+                    onLongPressStart: (onLongPressStartDetails) {
+                      showDialog(
+                          context: context,
+                          builder: (context) => AlertDialog(
+                                title: Text('Supprimer le fichier'),
+                                content: Text(
+                                    'Voulez-vous vraiment supprimer ce fichier?'),
+                                actions: [
+                                  TextButton(
+                                    onPressed: () {
+                                      file.deleteSync();
+                                      Navigator.of(context).pop();
+                                      setState(() {
+                                        
+                                      });
+                                    },
+                                    child: Text('Oui'),
+                                  ),
+                                  TextButton(
+                                    onPressed: () =>
+                                        Navigator.of(context).pop(),
+                                    child: Text('Non'),
+                                  ),
+                                ],
+                              ));
+                    },
+                    child: MusicContainer(
+                      title: file.uri.pathSegments.last.replaceAll('.mp3', ''),
+                      icon: Icons.music_note,
+                      isFavorite: false,
+                      onTap: () => Navigator.of(context).push(MaterialPageRoute(
+                        builder: (context) => MusicPage(
+                          name:
+                              file.uri.pathSegments.last.replaceAll('.mp3', ''),
+                          fileUrl: file.path,
+                          localFilePath: file.path,
+                        ),
+                      )),
+                    ),
                   );
                 },
               );
             }
-            
+
             return const Center(
               child: Text(
                 'Aucun telechargement',

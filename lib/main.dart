@@ -1,10 +1,13 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:lumiers/auth/signin.dart';
 import 'package:lumiers/utils/user_provider.dart';
 import 'package:provider/provider.dart';
 
+
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  await dotenv.load(fileName: '.env');
   runApp(ChangeNotifierProvider(
       create: (_) => UserProvider(), child: const MyApp()));
 }

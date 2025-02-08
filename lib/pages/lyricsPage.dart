@@ -179,8 +179,17 @@ class _LyricsPageState extends State<LyricsPage> {
               style: Theme.of(context).textTheme.bodyLarge?.copyWith(
                     height: 1.5,
                     letterSpacing: 0.3,
+                    fontSize: 21,
+                    shadows: [
+                      Shadow(
+                        color: Colors.black.withOpacity(0.1),
+                        offset: const Offset(1, 1),
+                        blurRadius: 2,
+                      ),
+                    ],
                   ),
-              textAlign: TextAlign.left,
+              textAlign: TextAlign.center,
+
             ),
           ],
         ),

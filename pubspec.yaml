@@ -47,6 +47,7 @@ dependencies:
   cached_network_image: ^3.4.1
   audio_video_progress_bar: ^2.0.3
   dio: ^5.8.0+1
+  flutter_dotenv: ^5.2.1
 
 dev_dependencies:
   flutter_test:
@@ -73,4 +74,5 @@ flutter:
 
   # Add assets to your application. Ensure that the image path is added to assets:
   assets:
+    - .env
     - assets/iconimage.jpg  

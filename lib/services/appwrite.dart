@@ -1,15 +1,16 @@
 import 'package:appwrite/appwrite.dart';
 import 'package:appwrite/models.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 
 
 class AppwriteConfig {
-  static const String projectId = '677ee4b3003777fc3095';
-  static const String databaseId = '677ee583000a6aad4d96';
-  static const String userCollection = '677ee59b001053a8d575';
-  static const String musicCollection = '677ee5af002689ed97fb';
-  static const String lyricsCollection = '677ee5bc002053b3c9e1';
-  static const String endpoint = 'https://cloud.appwrite.io/v1';
-  static const String storage = '677ee543002f651f7389';
+  static String projectId = dotenv.env['PROJECT_ID'] ?? '';
+  static String databaseId = dotenv.env['DATABASE_ID'] ?? '';
+  static String userCollection = dotenv.env['USERCOLLECTION_ID'] ?? '';
+  static String musicCollection = dotenv.env['MUSICCOLLECTION_ID'] ?? '';
+  static String lyricsCollection = dotenv.env['LYRICSCOLLECTION_ID'] ?? '';
+  static String endpoint = dotenv.env['END_POINT'] ?? '';
+  static String storage = dotenv.env['STORAGE_ID'] ?? '';
 }
 
 class AppwriteServices {
