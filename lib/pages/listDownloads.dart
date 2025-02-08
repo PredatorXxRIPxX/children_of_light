@@ -102,8 +102,9 @@ class _ListdownloadsState extends State<Listdownloads> {
                     isFavorite: false,
                     onTap: () => Navigator.of(context).push(MaterialPageRoute(
                       builder: (context) => MusicPage(
-                        name: file.path,
+                        name: file.uri.pathSegments.last.replaceAll('.mp3', ''),
                         fileUrl: file.path,
+                        localFilePath: file.path,
                       ),
                     )),
                   );

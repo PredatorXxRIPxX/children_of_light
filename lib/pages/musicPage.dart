@@ -11,12 +11,14 @@ class MusicPage extends StatefulWidget {
   final String name;
   final String fileUrl;
   final String? imageUrl;
+  final String? localFilePath;
 
   const MusicPage({
     super.key,
     required this.name,
     required this.fileUrl,
     this.imageUrl,
+    this.localFilePath,
   });
 
   @override
@@ -58,6 +60,9 @@ class _MusicPageState extends State<MusicPage>
 
       if (await file.exists()) {
         _permanentFilePath = file.path;
+        if (widget.localFilePath != null) {
+          _permanentFilePath = widget.localFilePath;
+        }
         await _setupAudioPlayer(file.path);
         return;
       }
