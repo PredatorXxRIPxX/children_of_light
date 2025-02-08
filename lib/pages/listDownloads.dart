@@ -1,9 +1,9 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:lumiers/components/musiccontainer.dart';
+import 'package:lumiers/pages/musicPage.dart';
 import 'package:path_provider/path_provider.dart';
-import 'package:crypto/crypto.dart';
-import 'dart:convert';
+
 
 class Listdownloads extends StatefulWidget {
   const Listdownloads({super.key});
@@ -13,12 +13,12 @@ class Listdownloads extends StatefulWidget {
 }
 
 class _ListdownloadsState extends State<Listdownloads> {
-  Directory? _downloadsDirectory;
-  List<FileSystemEntity> _files = [];
+  Directory? downloadsDirectory;
+  List<FileSystemEntity> files = [];
+
   Future<Directory> _checkExistenceDirectory() async {
     final temporaryDirectory = await getApplicationDocumentsDirectory();
     final downloadsDirectory = Directory('${temporaryDirectory.path}/music');
-
     if (!downloadsDirectory.existsSync()) {
       await downloadsDirectory.create(recursive: true);
     }
@@ -31,7 +31,7 @@ class _ListdownloadsState extends State<Listdownloads> {
     if (!musicDir.existsSync()) {
       await musicDir.create(recursive: true);
     }
-    _files.addAll(musicDir.listSync());
+    files.addAll(musicDir.listSync());
   }
 
   Future<String> readFile(String fileName) async {
@@ -47,7 +47,7 @@ class _ListdownloadsState extends State<Listdownloads> {
   }
 
   Future<void> _initializeDownloadsDirectory() async {
-    _downloadsDirectory = await _checkExistenceDirectory();
+    downloadsDirectory = await _checkExistenceDirectory();
     setState(() {});
   }
 
@@ -55,7 +55,7 @@ class _ListdownloadsState extends State<Listdownloads> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text(
+        title: const Text(
           'Mes Telechargements',
           style: TextStyle(color: Colors.white),
         ),
@@ -63,7 +63,7 @@ class _ListdownloadsState extends State<Listdownloads> {
         foregroundColor: Colors.white,
       ),
       body: Padding(
-        padding: EdgeInsets.all(8.0),
+        padding: const EdgeInsets.all(8.0),
         child: FutureBuilder(
           future: _checkExistenceDirectory(),
           builder: (context, snapshot) {
@@ -71,23 +71,27 @@ class _ListdownloadsState extends State<Listdownloads> {
               return Center(
                 child: Text('Erreur: ${snapshot.error}'),
               );
-            } else if (snapshot.connectionState == ConnectionState.waiting) {
-              return Center(
+            }
+            
+            if (snapshot.connectionState == ConnectionState.waiting) {
+              return const Center(
                 child: CircularProgressIndicator(),
               );
-            } else if (snapshot.hasData) {
+            }
+            
+            if (snapshot.hasData) {
               final downloadsDirectory = snapshot.data as Directory;
               final files = downloadsDirectory.listSync();
-
+              
               if (files.isEmpty) {
-                return Center(
+                return const Center(
                   child: Text(
                     'Aucun telechargement',
                     style: TextStyle(color: Colors.red, fontSize: 18),
                   ),
                 );
               }
-
+              
               return ListView.builder(
                 itemCount: files.length,
                 itemBuilder: (context, index) {
@@ -96,11 +100,18 @@ class _ListdownloadsState extends State<Listdownloads> {
                     title: file.uri.pathSegments.last.replaceAll('.mp3', ''),
                     icon: Icons.music_note,
                     isFavorite: false,
+                    onTap: () => Navigator.of(context).push(MaterialPageRoute(
+                      builder: (context) => MusicPage(
+                        name: file.path,
+                        fileUrl: file.path,
+                      ),
+                    )),
                   );
                 },
               );
             }
-            return Center(
+            
+            return const Center(
               child: Text(
                 'Aucun telechargement',
                 style: TextStyle(color: Colors.red, fontSize: 18),
