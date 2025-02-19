@@ -1,7 +1,7 @@
 import 'package:appwrite/appwrite.dart';
 import 'package:appwrite/models.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
-
+import 'package:lumiers/pages/creations.dart';
 
 class AppwriteConfig {
   static String projectId = dotenv.env['PROJECT_ID'] ?? '';
@@ -133,6 +133,7 @@ class AppwriteServices {
   static Future<Map<String, dynamic>> getCurrentUser() async {
     try {
       final user = await account.get();
+      
       return {
         'success': true,
         'user': user.toMap(),
@@ -152,7 +153,7 @@ class AppwriteServices {
       final response = await account.createVerification(
         url: 'internal',
       );
-      print('sendVerification:'+response.toString());
+      print('sendVerification:' + response.toString());
       return {
         'success': true,
         'message': 'Recovery email sent',
@@ -181,7 +182,7 @@ class AppwriteServices {
         userId: 'current',
         secret: code,
       );
-      print('verify:'+response.toString());
+      print('verify:' + response.toString());
       return {
         'success': true,
         'message': 'Account verified',
@@ -315,7 +316,7 @@ class AppwriteServices {
             'lyrics': [
               ...currentdata.data['lyrics'],
               {
-                'id_lyrics':lyricsDoc.$id,
+                'id_lyrics': lyricsDoc.$id,
                 'name': lyricsDoc.data['name'],
                 'url_file': lyricsDoc.data['url_file'],
               }
@@ -334,8 +335,7 @@ class AppwriteServices {
     }
   }
 
-
-  static Future <Map<String,dynamic>> updateProfile({
+  static Future<Map<String, dynamic>> updateProfile({
     String username = '',
     String email = '',
     String password = '',
@@ -345,8 +345,9 @@ class AppwriteServices {
       if (username.isNotEmpty) {
         response = await AppwriteServices.account.updateName(name: username);
       }
-      if (email.isNotEmpty&&password.isNotEmpty) {
-        response = await AppwriteServices.account.updateEmail(email: email, password: password);
+      if (email.isNotEmpty && password.isNotEmpty) {
+        response = await AppwriteServices.account
+            .updateEmail(email: email, password: password);
       }
       return {
         'success': true,
@@ -356,19 +357,19 @@ class AppwriteServices {
     } catch (e) {
       return {
         'success': false,
-        'message': e.toString(),        
+        'message': e.toString(),
       };
     }
   }
 
-  static Future <Map<String,dynamic>> getFavlist(String iduser) async {
+  static Future<Map<String, dynamic>> getFavlist(String iduser) async {
     try {
       final response = await AppwriteServices.db.getDocument(
-          databaseId: AppwriteConfig.databaseId,
-          collectionId: AppwriteConfig.userCollection,
-          documentId: iduser,
-          );
-      
+        databaseId: AppwriteConfig.databaseId,
+        collectionId: AppwriteConfig.userCollection,
+        documentId: iduser,
+      );
+
       final lyrics = response.data['lyrics'];
       final musics = response.data['musics'];
 
@@ -388,7 +389,7 @@ class AppwriteServices {
     }
   }
 
-  static Future<Map<String, dynamic>>getMusic(int amount) async {
+  static Future<Map<String, dynamic>> getMusic(int amount) async {
     try {
       final documents = await db.listDocuments(
           databaseId: AppwriteConfig.databaseId,
@@ -410,7 +411,7 @@ class AppwriteServices {
     }
   }
 
-  static Future <Map<String,dynamic>> getMusicQuery(String name) async {
+  static Future<Map<String, dynamic>> getMusicQuery(String name) async {
     try {
       final response = await AppwriteServices.db.listDocuments(
           databaseId: AppwriteConfig.databaseId,
@@ -422,6 +423,50 @@ class AppwriteServices {
         'success': true,
         'message': 'Music retrieved successfully',
         'response': response.documents,
+      };
+    } catch (e) {
+      return {
+        'success': false,
+        'message': e.toString(),
+      };
+    }
+  }
+
+  static Future<Map<String, dynamic>> uploadFiles(
+      InputFile file, FileType filetype, String filename,String creator) async {
+    try {
+      final fileid = ID.unique();
+      final response = await AppwriteServices.storage.createFile(
+          bucketId: AppwriteConfig.storage, fileId: fileid, file: file);
+      if (filetype == FileType.text) {
+        await AppwriteServices.db.createDocument(
+            databaseId: AppwriteConfig.databaseId,
+            collectionId: AppwriteConfig.lyricsCollection,
+            documentId: ID.unique(),
+            data: {
+              'id_lyrics': ID.unique(),
+              'name': filename,
+              'createdby':creator,
+              'url_file':
+                  'https://cloud.appwrite.io/v1/storage/buckets/$AppwriteConfig.storage/files/$fileid/view?project=$AppwriteConfig.projectId&mode=admin',
+            });
+      } else if (filetype == FileType.audio) {
+        await AppwriteServices.db.createDocument(
+            databaseId: AppwriteConfig.databaseId,
+            collectionId: AppwriteConfig.musicCollection,
+            documentId: ID.unique(),
+            data: {
+              'id_musics': ID.unique(),
+              'name': filename,
+              'createdby':creator,
+              'file_url':
+                  'https://cloud.appwrite.io/v1/storage/buckets/$AppwriteConfig.storage/files/$fileid/view?project=$AppwriteConfig.projectId&mode=admin',
+            });
+      }
+      return {
+        'success': true,
+        'message': 'File uploaded successfully',
+        'response': response,
       };
     } catch (e) {
       return {

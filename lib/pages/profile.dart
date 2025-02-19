@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:hugeicons/hugeicons.dart';
 import 'package:lumiers/auth/signin.dart';
+import 'package:lumiers/pages/creations.dart';
 import 'package:lumiers/pages/editProfile.dart';
 import 'package:lumiers/pages/listDownloads.dart';
 import 'package:lumiers/pages/listfav.dart';
@@ -63,7 +64,10 @@ class _ProfileState extends State<Profile> {
             gradient: LinearGradient(
               begin: Alignment.topLeft,
               end: Alignment.bottomRight,
-              colors: [Theme.of(context).colorScheme.primary, Theme.of(context).colorScheme.secondary],
+              colors: [
+                Theme.of(context).colorScheme.primary,
+                Theme.of(context).colorScheme.secondary
+              ],
             ),
           ),
         ),
@@ -90,7 +94,8 @@ class _ProfileState extends State<Profile> {
               padding: const EdgeInsets.all(4),
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
-                border: Border.all(color: Theme.of(context).colorScheme.primary, width: 4),
+                border: Border.all(
+                    color: Theme.of(context).colorScheme.primary, width: 4),
                 boxShadow: [
                   BoxShadow(
                     color: Colors.black.withOpacity(0.2),
@@ -150,11 +155,11 @@ class _ProfileState extends State<Profile> {
                 value: 'Vos chants et quantines préférés',
               ),
               onTap: () {
-                Navigator.of(context).push(MaterialPageRoute(builder: (context) => ListFav()));
+                Navigator.of(context)
+                    .push(MaterialPageRoute(builder: (context) => ListFav()));
               },
             ),
             const Divider(height: 24),
-            
             GestureDetector(
               child: _buildDetailItem(
                 icon: HugeIcon(
@@ -166,7 +171,24 @@ class _ProfileState extends State<Profile> {
                 value: 'Vos chants et quantines téléchargés',
               ),
               onTap: () {
-                Navigator.of(context).push(MaterialPageRoute(builder: (context) => const Listdownloads()));
+                Navigator.of(context).push(MaterialPageRoute(
+                    builder: (context) => const Listdownloads()));
+              },
+            ),
+            const Divider(height: 24),
+            GestureDetector(
+              child: _buildDetailItem(
+                icon: HugeIcon(
+                  icon: HugeIcons.strokeRoundedMusicNote01,
+                  color: Colors.black,
+                  size: 24.0,
+                ),
+                label: 'Mes Chansons',
+                value: 'Vos chants et quantines creatés par vous',
+              ),
+              onTap: () {
+                Navigator.of(context).push(
+                    MaterialPageRoute(builder: (context) => const Creations()));
               },
             ),
           ],
