@@ -509,4 +509,42 @@ class AppwriteServices {
       };
     }
   }
+
+  static Future<Map<String, dynamic>> deleteLyrics(String docid) async {
+    try {
+      final response = await AppwriteServices.db.deleteDocument(
+          databaseId: AppwriteConfig.databaseId,
+          collectionId: AppwriteConfig.lyricsCollection,
+          documentId: docid);
+      return {
+        'success': true,
+        'message': 'Lyrics deleted successfully',
+        'response': response,
+      };
+    } catch (e) {
+      return {
+        'success': false,
+        'message': e.toString(),
+      };
+    }
+  }
+
+  static Future<Map<String, dynamic>> deleteMusic(String docid) async {
+    try {
+      final response = await AppwriteServices.db.deleteDocument(
+          databaseId: AppwriteConfig.databaseId,
+          collectionId: AppwriteConfig.musicCollection,
+          documentId: docid);
+      return {
+        'success': true,
+        'message': 'Music deleted successfully',
+        'response': response,
+      };
+    } catch (e) {
+      return {
+        'success': false,
+        'message': e.toString(),
+      };
+    }
+  }
 }
