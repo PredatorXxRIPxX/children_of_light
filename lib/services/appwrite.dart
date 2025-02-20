@@ -133,7 +133,7 @@ class AppwriteServices {
   static Future<Map<String, dynamic>> getCurrentUser() async {
     try {
       final user = await account.get();
-      
+
       return {
         'success': true,
         'user': user.toMap(),
@@ -432,8 +432,8 @@ class AppwriteServices {
     }
   }
 
-  static Future<Map<String, dynamic>> uploadFiles(
-      InputFile file, FileType filetype, String filename,String creator) async {
+  static Future<Map<String, dynamic>> uploadFiles(InputFile file,
+      FileType filetype, String filename, String creator) async {
     try {
       final fileid = ID.unique();
       final response = await AppwriteServices.storage.createFile(
@@ -446,7 +446,7 @@ class AppwriteServices {
             data: {
               'id_lyrics': ID.unique(),
               'name': filename,
-              'createdby':creator,
+              'createdby': creator,
               'url_file':
                   'https://cloud.appwrite.io/v1/storage/buckets/$AppwriteConfig.storage/files/$fileid/view?project=$AppwriteConfig.projectId&mode=admin',
             });
@@ -458,7 +458,7 @@ class AppwriteServices {
             data: {
               'id_musics': ID.unique(),
               'name': filename,
-              'createdby':creator,
+              'createdby': creator,
               'file_url':
                   'https://cloud.appwrite.io/v1/storage/buckets/$AppwriteConfig.storage/files/$fileid/view?project=$AppwriteConfig.projectId&mode=admin',
             });
@@ -467,6 +467,40 @@ class AppwriteServices {
         'success': true,
         'message': 'File uploaded successfully',
         'response': response,
+      };
+    } catch (e) {
+      return {
+        'success': false,
+        'message': e.toString(),
+      };
+    }
+  }
+
+  static Future<Map<String, dynamic>> getCreations() async {
+    try {
+      final userid = await AppwriteServices.getCurrentUser();
+      if (!userid['success']) {
+        return {
+          'success': false,
+          'message': 'Failed to get current user',
+        };
+      }
+
+      final responseLyrics = await AppwriteServices.db.listDocuments(
+          databaseId: AppwriteConfig.databaseId,
+          collectionId: AppwriteConfig.lyricsCollection,
+          queries: [Query.equal('createdby', userid['user']['\$id'])]);
+
+      final responseMusics = await AppwriteServices.db.listDocuments(
+          databaseId: AppwriteConfig.databaseId,
+          collectionId: AppwriteConfig.musicCollection,
+          queries: [Query.equal('createdby', userid['user']['\$id'])]);
+
+      return {
+        'success': true,
+        'message': 'Creations retrieved successfully',
+        'response': responseLyrics.documents,
+        'musicResponse': responseMusics.documents,
       };
     } catch (e) {
       return {

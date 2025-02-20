@@ -260,7 +260,7 @@ class _MusicPageState extends State<MusicPage>
         children: [
           CircularProgressIndicator(
             value: _downloadProgress,
-            color: Theme.of(context).colorScheme.secondary,
+            color: Theme.of(context).colorScheme.primary,
           ),
           const SizedBox(height: 10),
           Text(
@@ -388,11 +388,11 @@ class _MusicPageState extends State<MusicPage>
                     Row(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        IconButton(
+                        /*IconButton(
                           icon: const Icon(Icons.skip_previous, size: 40),
                           onPressed: () => _player.seekToPrevious(),
                         ),
-                        const SizedBox(width: 20),
+                        const SizedBox(width: 20),*/
                         IconButton(
                           icon: Icon(
                             _isPlaying ? Icons.pause_circle : Icons.play_circle,
@@ -402,10 +402,11 @@ class _MusicPageState extends State<MusicPage>
                           onPressed: _togglePlayPause,
                         ),
                         const SizedBox(width: 20),
+                        /*
                         IconButton(
                           icon: const Icon(Icons.skip_next, size: 40),
                           onPressed: () => _player.seekToNext(),
-                        ),
+                        ),*/
                       ],
                     ),
                   ],

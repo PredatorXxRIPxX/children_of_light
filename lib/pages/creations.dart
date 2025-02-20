@@ -1,14 +1,19 @@
 import 'package:appwrite/appwrite.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/rendering.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:lumiers/components/modelsheet.dart';
 import 'package:lumiers/components/musiccontainer.dart';
+import 'package:lumiers/pages/lyricsPage.dart';
+import 'package:lumiers/pages/musicPage.dart';
 import 'package:lumiers/services/appwrite.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-
 enum FileType { audio, text }
+
+extension FileTypeExtension on FileType {
+  String get extension => this == FileType.audio ? '.mp3' : '.txt';
+  String get description => this == FileType.audio ? 'musique' : 'texte';
+}
 
 class Creations extends StatefulWidget {
   const Creations({super.key});
@@ -18,9 +23,10 @@ class Creations extends StatefulWidget {
 }
 
 class _CreationsState extends State<Creations> {
-  late Future<List<MusicContainer>> _creationsFuture;
+  late Future<List<GestureDetector>> _creationsFuture;
   final ImagePicker _picker = ImagePicker();
   SharedPreferences? prefs;
+  bool _isLoading = false;
 
   @override
   void initState() {
@@ -33,94 +39,225 @@ class _CreationsState extends State<Creations> {
     prefs = await SharedPreferences.getInstance();
   }
 
-  Future<List<MusicContainer>> _fetchCreations() async {
+  Future<List<GestureDetector>> _fetchCreations() async {
+    if (!mounted) return [];
+
     try {
-      await Future.delayed(const Duration(milliseconds: 500));
-      // Ajoutez ici votre logique de récupération des données
-      return [];
+      setState(() => _isLoading = true);
+
+      final response = await AppwriteServices.getCreations();
+      if (!response['success']) {
+        throw Exception(response['message']);
+      }
+
+      final List<GestureDetector> creations = [];
+
+      final lyricsDocuments = response['response'] as List<dynamic>;
+      for (final doc in lyricsDocuments) {
+        creations.add(
+          GestureDetector(
+            child: MusicContainer(
+              title: doc.data['name'] as String,
+              icon: Icons.music_note,
+              isFavorite: false,
+            ),
+            onTap: () => Navigator.of(context).push(MaterialPageRoute(
+                builder: (context) => LyricsPage(
+                      title: doc.data['name'],
+                      fileUrl: doc.data['url_file'],
+                    ))),
+          ),
+        );
+      }
+
+      final musicDocuments = response['musicResponse'] as List<dynamic>?;
+      if (musicDocuments != null) {
+        for (final doc in musicDocuments) {
+          creations.add(
+            GestureDetector(
+              child: MusicContainer(
+                title: doc.data['name'] as String,
+                icon: Icons.music_note,
+                isFavorite: false,
+              ),
+              onTap: () => Navigator.of(context).push(MaterialPageRoute(
+                  builder: (context) => MusicPage(
+                      name: doc.data['name'], fileUrl: doc.data['file_url']))),
+            ),
+          );
+        }
+      }
+
+      return creations;
     } catch (e) {
-      print('Erreur lors de la récupération des créations: $e');
+      debugPrint('Error fetching creations: $e');
       return [];
+    } finally {
+      if (mounted) {
+        setState(() => _isLoading = false);
+      }
     }
   }
 
   Future<void> _refreshCreations() async {
+    if (!mounted) return;
     setState(() {
       _creationsFuture = _fetchCreations();
     });
   }
 
-  Future<void> _uploadFile(FileType type) async {
-  try {
-    XFile? pickedFile = await _picker.pickMedia();
-    
-    if (pickedFile == null) return;
+  void _showSnackBar(String message, {bool isError = false}) {
+    if (!mounted) return;
 
-    bool isValidFile = type == FileType.audio ? 
-      pickedFile.path.toLowerCase().endsWith('.mp3') :
-      pickedFile.path.toLowerCase().endsWith('.txt');
-
-    if (!isValidFile) {
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(
-              'Format de fichier invalide. Veuillez sélectionner un fichier ${type == FileType.audio ? '.mp3' : '.txt'}'
-            ),
-            backgroundColor: Colors.orange,
-          ),
-        );
-      }
-      return;
-    }
-
-    String fileName = pickedFile.path.split('/').last;
-    
-    InputFile file = await InputFile.fromPath(
-      path: pickedFile.path,
-      filename: fileName,
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(message),
+        backgroundColor: isError ? Colors.red : Colors.green,
+      ),
     );
+  }
 
-    print('Envoi du fichier $fileName');
+  Future<void> _uploadFile(FileType type) async {
+    try {
+      final XFile? pickedFile = await _picker.pickMedia();
+      if (pickedFile == null) return;
 
-    final currentUser = await AppwriteServices.getCurrentUser();
-    if(currentUser['success']) {
-      final userData = currentUser['user'] as Map<String, dynamic>;
-      String creator = userData['\$id'] as String;
-      await AppwriteServices.uploadFiles(file, type, fileName,creator);
-    } else {
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Une erreur est survenue lors de l\'upload'),
-            backgroundColor: Colors.red,
-          ),
-        );
+      final bool isValidFile =
+          pickedFile.path.toLowerCase().endsWith(type.extension);
+      if (!isValidFile) {
+        _showSnackBar(
+            'Format de fichier invalide. Veuillez sélectionner un fichier ${type.extension}',
+            isError: true);
+        return;
       }
-    }
-    if (mounted) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Fichier envoyé avec succès'),
-          backgroundColor: Colors.green,
-        ),
-      );
-      
-      _refreshCreations();
-    }
 
-  } catch (e) {
-    print('Erreur lors de l\'upload: $e');
-    if (mounted) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Une erreur est survenue lors de l\'upload'),
-          backgroundColor: Colors.red,
-        ),
+      final String fileName = pickedFile.path.split('/').last;
+      final InputFile file = await InputFile.fromPath(
+        path: pickedFile.path,
+        filename: fileName,
       );
+
+      final Map<String, dynamic> currentUser =
+          await AppwriteServices.getCurrentUser();
+      if (!currentUser['success']) {
+        _showSnackBar('Erreur d\'authentification', isError: true);
+        return;
+      }
+
+      final String creator = currentUser['user']['\$id'] as String;
+      final Map<String, dynamic> response =
+          await AppwriteServices.uploadFiles(file, type, fileName, creator);
+
+      if (response['success']) {
+        _showSnackBar('Fichier de ${type.description} publié avec succès');
+        await _refreshCreations();
+      } else {
+        _showSnackBar('Erreur lors de l\'upload du fichier', isError: true);
+      }
+    } catch (e) {
+      debugPrint('Upload error: $e');
+      _showSnackBar('Une erreur est survenue lors de l\'upload', isError: true);
     }
   }
-}
+
+  Widget _buildEmptyState() {
+    return Center(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Icon(
+            Icons.music_note,
+            color: Theme.of(context).colorScheme.primary,
+            size: 60,
+          ),
+          const SizedBox(height: 16),
+          Text(
+            'Aucune création pour le moment',
+            style: TextStyle(
+              color: Theme.of(context).colorScheme.primary,
+              fontSize: 16,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildErrorState() {
+    return Center(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          const Icon(
+            Icons.error_outline,
+            color: Colors.red,
+            size: 60,
+          ),
+          const SizedBox(height: 16),
+          const Text(
+            'Une erreur est survenue',
+            style: TextStyle(
+              color: Colors.white,
+              fontSize: 16,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildUploadOptionsModal() {
+    return ModalSheet(
+      isDismissible: true,
+      child: SizedBox(
+        height: MediaQuery.of(context).size.height * 0.5,
+        child: Column(
+          children: [
+            Container(
+              height: 8,
+              width: MediaQuery.of(context).size.width * 0.4,
+              margin: const EdgeInsets.symmetric(vertical: 16),
+              decoration: BoxDecoration(
+                color: Colors.grey[300],
+                borderRadius: BorderRadius.circular(2),
+              ),
+            ),
+            const Text(
+              "Choisissez la source de votre musique :",
+              style: TextStyle(
+                color: Colors.black,
+                fontSize: 21,
+                fontWeight: FontWeight.bold,
+              ),
+              textAlign: TextAlign.center,
+              overflow: TextOverflow.fade,
+            ),
+            const SizedBox(height: 16),
+            Expanded(
+              child: ListView(
+                children: [
+                  ListTile(
+                      leading: const Icon(Icons.music_note),
+                      title: const Text('Importer un fichier .mp3'),
+                      onTap: () {
+                        Navigator.of(context).pop();
+                        _uploadFile(FileType.audio);
+                      }),
+                  ListTile(
+                      leading: const Icon(Icons.file_copy),
+                      title: const Text('Importer un fichier .txt'),
+                      onTap: () {
+                        Navigator.of(context).pop();
+                        _uploadFile(FileType.text);
+                      }),
+                ],
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -143,66 +280,28 @@ class _CreationsState extends State<Creations> {
         onRefresh: _refreshCreations,
         child: Padding(
           padding: const EdgeInsets.all(16.0),
-          child: FutureBuilder<List<MusicContainer>>(
+          child: FutureBuilder<List<GestureDetector>>(
             future: _creationsFuture,
             builder: (context, snapshot) {
-              if (snapshot.connectionState == ConnectionState.waiting) {
+              if (snapshot.connectionState == ConnectionState.waiting ||
+                  _isLoading) {
                 return const Center(
-                  child: CircularProgressIndicator.adaptive(),
-                );
+                    child: CircularProgressIndicator.adaptive());
               }
 
               if (snapshot.hasError) {
-                return Center(
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      const Icon(
-                        Icons.error_outline,
-                        color: Colors.red,
-                        size: 60,
-                      ),
-                      const SizedBox(height: 16),
-                      const Text(
-                        'Une erreur est survenue',
-                        style: TextStyle(
-                          color: Colors.white,
-                          fontSize: 16,
-                        ),
-                      ),
-                    ],
-                  ),
-                );
+                return _buildErrorState();
               }
 
               final creations = snapshot.data ?? [];
               if (creations.isEmpty) {
-                return Center(
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Icon(
-                        Icons.music_note,
-                        color: Theme.of(context).colorScheme.primary,
-                        size: 60,
-                      ),
-                      const SizedBox(height: 16),
-                      Text(
-                        'Aucune création pour le moment',
-                        style: TextStyle(
-                          color: Theme.of(context).colorScheme.primary,
-                          fontSize: 16,
-                        ),
-                      ),
-                    ],
-                  ),
-                );
+                return _buildEmptyState();
               }
 
               return ListView.separated(
                 itemCount: creations.length,
-                separatorBuilder: (context, index) => const SizedBox(height: 12),
-                itemBuilder: (context, index) => creations[index],
+                separatorBuilder: (_, __) => const SizedBox(height: 12),
+                itemBuilder: (_, index) => creations[index],
               );
             },
           ),
@@ -216,53 +315,7 @@ class _CreationsState extends State<Creations> {
             shape: const RoundedRectangleBorder(
               borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
             ),
-            builder: (context) => ModalSheet(
-              isDismissible: true,
-              child: SizedBox(
-                height: MediaQuery.of(context).size.height * 0.5,
-                child: Column(
-                  children: [
-                    Container(
-                      height: 8,
-                      width: MediaQuery.of(context).size.width * 0.4,
-                      margin: const EdgeInsets.only(top: 16, bottom: 16),
-                      decoration: BoxDecoration(
-                        color: Colors.grey[300],
-                        borderRadius: BorderRadius.circular(2),
-                      ),
-                    ),
-                    const Text(
-                      "Choisissez la source de votre musique :",
-                      softWrap: true,
-                      overflow: TextOverflow.ellipsis,
-                      textAlign: TextAlign.center,
-                      style: TextStyle(
-                        color: Colors.black,
-                        fontSize: 21,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                    const SizedBox(height: 16),
-                    Expanded(
-                      child: ListView(
-                        children: [
-                          ListTile(
-                            leading: const Icon(Icons.music_note),
-                            title: const Text('Importer un fichier .mp3'),
-                            onTap: () => _uploadFile(FileType.audio),
-                          ),
-                          ListTile(
-                            leading: const Icon(Icons.file_copy),
-                            title: const Text('Importer un fichier .txt'),
-                            onTap: () => _uploadFile(FileType.text),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ),
+            builder: (_) => _buildUploadOptionsModal(),
           );
         },
         backgroundColor: Theme.of(context).colorScheme.primary,
