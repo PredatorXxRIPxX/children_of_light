@@ -63,9 +63,12 @@ dev_dependencies:
   flutter_lints: ^5.0.0
 
 flutter_icons:
-  android: true
+  android: "ic_launcher"
   ios: true
-  image_path: "assets/iconimage.jpg"  # Ensure the path is correct and the image exists in the assets folder
+  image_path: "assets/icon/logo.png" 
+  adaptive_icon_background: "assets/icon/logo.png"
+  adaptive_icon_foreground: "assets/icon/logo.png"
+  min_sdk_version: 21
 
 flutter:
 
@@ -77,4 +80,4 @@ flutter:
   # Add assets to your application. Ensure that the image path is added to assets:
   assets:
     - .env
-    - assets/iconimage.jpg  
+    - assets/

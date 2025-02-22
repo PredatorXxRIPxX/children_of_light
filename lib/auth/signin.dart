@@ -1,3 +1,4 @@
+import 'package:appwrite/appwrite.dart';
 import 'package:flutter/material.dart';
 import 'package:lumiers/auth/forgetpassword.dart';
 import 'package:lumiers/auth/signup.dart';
@@ -17,10 +18,10 @@ class _SignInPageState extends State<SignInPage> {
   final _formKey = GlobalKey<FormState>();
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
-  late UserProvider userprovider;
+  late UserProvider userProvider;
   bool _isLoading = false;
   bool _isPasswordVisible = false;
-  bool stay_connected = false;
+  bool stayConnected = false;
 
   @override
   void dispose() {
@@ -32,62 +33,92 @@ class _SignInPageState extends State<SignInPage> {
   Future<void> _handleSignIn() async {
     if (_formKey.currentState!.validate()) {
       setState(() => _isLoading = true);
-      final Map<String, dynamic> response = await AppwriteServices.signIn(
-        email: _emailController.text,
-        password: _passwordController.text,
-        stayConnected: stay_connected,
-      );
-      final message = response['success'];
-      if (message == true) {
-        final username =
+
+      try {
+        
+        final userResponse = await AppwriteServices.db.listDocuments(
+          databaseId: AppwriteConfig.databaseId,
+          collectionId: AppwriteConfig.userCollection,
+          queries: [Query.equal('email', _emailController.text)],
+        );
+
+        if (userResponse.documents.isEmpty) {
+          throw Exception('User not found');
+        }
+
+        final session = await AppwriteServices.account.createEmailPasswordSession(
+          email: _emailController.text,
+          password: _passwordController.text,
+        );
+
+        if (!stayConnected) {
+          AppwriteServices.account.deleteSession(sessionId: 'current');       
+        }
+
+        final Map<String, dynamic> usernameResponse =
             await AppwriteServices.getUsername(email: _emailController.text);
 
-        userprovider.setEmail(_emailController.text);
-        userprovider.setUsername(username['username']);
+        if (usernameResponse['success']) {
+          userProvider.setEmail(_emailController.text);
+          userProvider.setUsername(usernameResponse['username']);
 
-        Navigator.of(context).pushReplacement(
-          MaterialPageRoute(
-            builder: (context) => const MainPage(),
-          ),
-        );
-      } else {
+          Navigator.of(context).pushReplacement(
+            MaterialPageRoute(
+              builder: (context) => const MainPage(),
+            ),
+          );
+        } else {
+          throw Exception('Failed to get username');
+        }
+      } catch (e) {
+        // Show error message
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text(response['message']),
+            content: Text(e.toString().contains('User not found')
+                ? 'Invalid email or password'
+                : 'An error occurred during sign in'),
             backgroundColor: Colors.red,
           ),
         );
+      } finally {
+        setState(() => _isLoading = false);
       }
-      setState(() => _isLoading = false);
     }
   }
 
   Future<void> _checkSession() async {
-    final Map<String, dynamic> response =
-        await AppwriteServices.getCurrentSession();
+    try {
+      final sessionResponse = await AppwriteServices.getCurrentSession();
 
-    final message = response['success'];
+      if (sessionResponse['success']) {
+        final userResponse = await AppwriteServices.getCurrentUser();
 
-    final user = await AppwriteServices.getCurrentUser();
+        if (userResponse['success']) {
+          final usernameResponse = await AppwriteServices.getUsername(
+            email: userResponse['user']['email'],
+          );
 
-    final username = await AppwriteServices.getUsername(
-        email: user.entries.last.value['email']);
+          if (usernameResponse['success']) {
+            userProvider.setEmail(userResponse['user']['email']);
+            userProvider.setUsername(usernameResponse['username']);
 
-    if (message == true) {
-      userprovider.setEmail(user.entries.last.value['email']);
-      userprovider.setUsername(username.entries.last.value);
-
-      Navigator.of(context).pushReplacement(
-        MaterialPageRoute(
-          builder: (context) => const MainPage(),
-        ),
-      );
+            Navigator.of(context).pushReplacement(
+              MaterialPageRoute(
+                builder: (context) => const MainPage(),
+              ),
+            );
+          }
+        }
+      }
+    } catch (e) {
+      // Session check failed - user needs to login
+      // No need to show error message as this is expected for non-logged in users
     }
   }
 
   @override
   void initState() {
-    userprovider = Provider.of<UserProvider>(context, listen: false);
+    userProvider = Provider.of<UserProvider>(context, listen: false);
     _checkSession();
     super.initState();
   }
@@ -125,7 +156,7 @@ class _SignInPageState extends State<SignInPage> {
                   ),
                   const SizedBox(height: 8),
                   Text(
-                    'identifiez-vous pour continuer',
+                    'Identifiez-vous pour continuer',
                     style: Theme.of(context).textTheme.bodyLarge?.copyWith(
                           color: Colors.grey[600],
                         ),
@@ -142,7 +173,7 @@ class _SignInPageState extends State<SignInPage> {
                           keyboardType: TextInputType.emailAddress,
                           decoration: InputDecoration(
                             labelText: 'Email',
-                            hintText: 'Enter votre email',
+                            hintText: 'Entrez votre email',
                             prefixIcon: Icon(
                               Icons.email_outlined,
                               color: Theme.of(context).colorScheme.primary,
@@ -158,18 +189,19 @@ class _SignInPageState extends State<SignInPage> {
                           ),
                           validator: (value) {
                             if (value?.isEmpty ?? true) {
-                              return 's\'il vous plait entrer votre email';
+                              return 'Veuillez entrer votre email';
                             }
                             return null;
                           },
                         ),
                         const SizedBox(height: 24),
+                        // Password Field
                         TextFormField(
                           controller: _passwordController,
                           obscureText: !_isPasswordVisible,
                           decoration: InputDecoration(
-                            labelText: 'mot de passe',
-                            hintText: 'Enter votre mot de passe',
+                            labelText: 'Mot de passe',
+                            hintText: 'Entrez votre mot de passe',
                             prefixIcon: Icon(
                               Icons.lock_outline,
                               color: Theme.of(context).colorScheme.primary,
@@ -179,7 +211,7 @@ class _SignInPageState extends State<SignInPage> {
                                 _isPasswordVisible
                                     ? Icons.visibility_off
                                     : Icons.visibility,
-                                  color: Theme.of(context).colorScheme.primary,
+                                color: Theme.of(context).colorScheme.primary,
                               ),
                               onPressed: () {
                                 setState(() {
@@ -198,25 +230,27 @@ class _SignInPageState extends State<SignInPage> {
                           ),
                           validator: (value) {
                             if (value?.isEmpty ?? true) {
-                              return 's\'il vous plait entrer votre mot de passe';
+                              return 'Veuillez entrer votre mot de passe';
                             }
                             return null;
                           },
                         ),
                         const SizedBox(height: 12),
+                        // Stay Connected Checkbox
                         Row(
                           children: [
                             Checkbox(
-                              value: stay_connected,
+                              value: stayConnected,
                               onChanged: (value) {
                                 setState(() {
-                                  stay_connected = value!;
+                                  stayConnected = value!;
                                 });
                               },
                             ),
                             const Text('Rester connecté'),
                           ],
                         ),
+                        // Forgot Password
                         Align(
                           alignment: Alignment.centerRight,
                           child: TextButton(
@@ -228,7 +262,7 @@ class _SignInPageState extends State<SignInPage> {
                                 ),
                               );
                             },
-                            child: const Text('mot de passe oublié?'),
+                            child: const Text('Mot de passe oublié?'),
                           ),
                         ),
                         const SizedBox(height: 24),
@@ -266,7 +300,7 @@ class _SignInPageState extends State<SignInPage> {
                     ),
                   ),
                   const Spacer(),
-
+                  // Sign Up Link
                   Center(
                     child: InkWell(
                       onTap: () => Navigator.of(context).pushReplacement(
